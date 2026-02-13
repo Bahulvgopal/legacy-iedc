@@ -19,15 +19,18 @@ export default function ExTeamPage() {
 
       setMembers(exMembers);
 
-      const uniqueYears = [
-        ...new Set(exMembers.map((m: any) => m.year)),
-      ].sort().reverse(); // newest year first
+     const uniqueYears: string[] = [
+  ...new Set(
+    exMembers.map((m: any) => String(m.year))
+  ),
+].sort().reverse();
 
-      setYears(uniqueYears);
+setYears(uniqueYears);
 
-      if (uniqueYears.length > 0) {
-        setSelectedYear(uniqueYears[0]);
-      }
+if (uniqueYears.length > 0) {
+  setSelectedYear(uniqueYears[0]);
+}
+
     }
 
     fetchMembers();
