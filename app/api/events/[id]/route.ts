@@ -35,7 +35,7 @@ export async function PUT(
     if (imageFile && imageFile.size > 0) {
       const bytes = await imageFile.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      updateData.imageUrl = `data:${imageFile.type};base64,${buffer.toString("base64")}`;
+      updateData.image = `data:${imageFile.type};base64,${buffer.toString("base64")}`;
     }
 
     const updated = await Event.findByIdAndUpdate(

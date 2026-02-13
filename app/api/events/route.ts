@@ -40,7 +40,7 @@ export async function POST(req: Request) {
       location,
       eventDate,
       registrationDeadline,
-      imageUrl: base64Image,
+      image: base64Image,
     });
 
     return NextResponse.json(event, { status: 201 });

@@ -7,7 +7,7 @@ export default async function UpcomingEventsPage() {
   const now = new Date();
 
   const events = await Event.find({
-    eventDate: { $gte: now },   // 🔥 IMPORTANT
+    eventDate: { $gte: now },
   }).sort({ eventDate: 1 });
 
   return (
@@ -23,18 +23,22 @@ export default async function UpcomingEventsPage() {
           {events.map((event: any) => (
             <div
               key={event._id}
-              className="bg-gray-900 p-6 rounded-lg"
+              className="bg-gray-900 p-6 rounded-lg shadow-lg"
             >
-              <img
-                src={event.imageUrl}
-                className="w-full h-48 object-cover rounded mb-4"
-              />
+              {/* 🔥 Image (Base64 upload support) */}
+              {event.image && (
+                <img
+                  src={event.image}
+                  alt={event.title}
+                  className="w-full h-48 object-cover rounded mb-4"
+                />
+              )}
 
               <h2 className="text-2xl font-semibold">
                 {event.title}
               </h2>
 
-              <p className="text-gray-400">
+              <p className="text-gray-400 mt-2">
                 {event.description}
               </p>
 
@@ -42,18 +46,17 @@ export default async function UpcomingEventsPage() {
                 📍 {event.location}
               </p>
 
-              <p>
+              <p className="mt-1">
                 📅{" "}
-                {new Date(
-                  event.eventDate
-                ).toDateString()}
+                {new Date(event.eventDate).toDateString()}
               </p>
 
+              {/* 🔥 Registration Status */}
               {new Date(event.registrationDeadline) >=
               new Date() ? (
                 <a
                   href={`/events/register/${event._id}`}
-                  className="inline-block mt-4 bg-blue-600 px-4 py-2 rounded"
+                  className="inline-block mt-4 bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition"
                 >
                   Register
                 </a>

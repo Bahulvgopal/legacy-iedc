@@ -9,7 +9,7 @@ type Member = {
   role: string;
   year: string;
   status: string;
-  imageUrl: string;
+  image: string;
 };
 
 export default function ExTeamPage() {
@@ -103,9 +103,9 @@ export default function ExTeamPage() {
                       key={member._id}
                       className="bg-gray-900 p-5 rounded-lg"
                     >
-                      {member.imageUrl && (
+                      {member.image && (
                         <img
-                          src={member.imageUrl}
+                          src={member.image}
                           alt={member.name}
                           className="w-full h-48 object-cover rounded"
                         />

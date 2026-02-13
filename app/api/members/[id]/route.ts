@@ -53,14 +53,14 @@ export async function PUT(
 
     // 🔥 delete old image if changed
     if (
-      oldMember.imageUrl &&
-      body.imageUrl &&
-      oldMember.imageUrl !== body.imageUrl
+      oldMember.image &&
+      body.image &&
+      oldMember.image !== body.image
     ) {
       const oldPath = path.join(
         process.cwd(),
         "public",
-        oldMember.imageUrl
+        oldMember.image
       );
 
       await fs.unlink(oldPath).catch(() => {});
@@ -100,11 +100,11 @@ export async function DELETE(
     }
 
     // 🔥 delete image file
-    if (member.imageUrl) {
+    if (member.image) {
       const filePath = path.join(
         process.cwd(),
         "public",
-        member.imageUrl
+        member.image
       );
 
       await fs.unlink(filePath).catch(() => {});

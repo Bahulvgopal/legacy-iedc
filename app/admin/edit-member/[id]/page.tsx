@@ -10,7 +10,7 @@ export default function EditMemberPage() {
 
   const [form, setForm] = useState({
     name: "",
-    imageUrl: "",
+    image: "",
     role: "",
     year: "",
     status: "current",
@@ -94,9 +94,9 @@ export default function EditMemberPage() {
             className="p-3 rounded bg-gray-800 outline-none"
           />
 
-          {form.imageUrl && (
+          {form.image && (
   <img
-    src={form.imageUrl}
+    src={form.image}
     className="w-32 h-32 object-cover rounded mb-4"
   />
 )}
@@ -120,7 +120,7 @@ export default function EditMemberPage() {
 
     setForm({
       ...form,
-      imageUrl: data.filePath,
+      image: data.filePath,
     });
   }}
 />

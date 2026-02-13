@@ -8,7 +8,7 @@ export default function AddMemberPage() {
 
   const [form, setForm] = useState({
     name: "",
-    imageUrl: "",
+    image: "",
     role: "",
     year: "",
     status: "current",
@@ -108,7 +108,7 @@ export default function AddMemberPage() {
 
     setForm({
       ...form,
-      imageUrl: data.filePath,
+      image: data.filePath,
     });
   }}
 />

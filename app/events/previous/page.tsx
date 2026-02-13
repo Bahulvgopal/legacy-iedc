@@ -24,7 +24,7 @@ export default async function PreviousEventsPage() {
               className="bg-gray-900 p-6 rounded-lg"
             >
               <img
-                src={event.imageUrl}
+                src={event.image}
                 className="w-full h-48 object-cover rounded mb-4"
               />
 

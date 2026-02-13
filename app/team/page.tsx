@@ -71,7 +71,7 @@ export default async function TeamPage() {
                 className="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 transition"
               >
                 <Image
-                  src={member.imageUrl}
+                  src={member.image}
                   alt={member.name}
                   width={400}
                   height={300}
@@ -106,7 +106,7 @@ export default async function TeamPage() {
                 className="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 transition duration-300"
               >
                 <Image
-                  src={member.imageUrl}
+                  src={member.image}
                   alt={member.name}
                   width={400}
                   height={300}

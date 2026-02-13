@@ -13,7 +13,7 @@ export default function EditEventPage() {
   const [form, setForm] = useState({
     title: "",
     description: "",
-    imageUrl: "",
+    image: "",
     location: "",
     eventDate: "",
     registrationDeadline: "",
@@ -34,7 +34,7 @@ export default function EditEventPage() {
         setForm({
           title: event.title || "",
           description: event.description || "",
-          imageUrl: event.imageUrl || "",
+          image: event.image || "",
           location: event.location || "",
           eventDate: event.eventDate?.slice(0, 10) || "",
           registrationDeadline:
@@ -105,9 +105,9 @@ export default function EditEventPage() {
             required
           />
 
-          {form.imageUrl && (
+          {form.image && (
   <img
-    src={form.imageUrl}
+    src={form.image}
     className="w-32 h-32 object-cover rounded mb-4"
   />
 )}
@@ -131,7 +131,7 @@ export default function EditEventPage() {
 
     setForm({
       ...form,
-      imageUrl: data.filePath,
+      image: data.filePath,
     });
   }}
 />

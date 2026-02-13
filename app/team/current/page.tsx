@@ -38,7 +38,7 @@ export default async function CurrentTeamPage() {
                       className="bg-gray-900 p-5 rounded-lg"
                     >
                       <img
-                        src={member.imageUrl}
+                        src={member.image}
                         className="w-full h-48 object-cover rounded"
                       />
 

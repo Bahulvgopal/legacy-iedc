@@ -103,15 +103,15 @@ export default async function AdminDashboard({
           </a>
         </div>
 
-       <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-6">
   {eventData.map((event: any) => (
     <div
       key={event._id}
       className="bg-gray-900 p-6 rounded-lg"
     >
-      {event.imageUrl && (
+      {event.image && (
         <img
-          src={event.imageUrl}
+          src={event.image}
           alt={event.title}
           className="w-full h-48 object-cover rounded mb-4"
         />
@@ -151,6 +151,7 @@ export default async function AdminDashboard({
     </div>
   ))}
 </div>
+
 
       </section>
 
@@ -215,7 +216,7 @@ export default async function AdminDashboard({
               className="bg-gray-900 p-6 rounded-lg"
             >
               <img
-                src={member.imageUrl}
+                src={member.image}
                 className="w-full h-48 object-cover rounded mb-4"
               />
 
