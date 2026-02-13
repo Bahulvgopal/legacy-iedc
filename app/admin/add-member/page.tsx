@@ -38,6 +38,7 @@ export default function AddMemberPage() {
     "Chief Creative And Innovation Officer",
     "Creative And Innovation Officer",
     "Executive Curator",
+    "Member",
   ];
 
   async function handleSubmit(e: React.FormEvent) {
@@ -90,32 +91,30 @@ export default function AddMemberPage() {
             <img
               src={form.image}
               className="w-32 h-32 object-cover rounded"
+              alt="Preview"
             />
           )}
 
-          {/* Image Upload */}
+          {/* 🔥 Base64 Image Upload */}
           <input
             type="file"
             accept="image/*"
             required
             className="p-3 rounded bg-gray-800"
-            onChange={async (e) => {
-              if (!e.target.files?.[0]) return;
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
 
-              const formData = new FormData();
-              formData.append("file", e.target.files[0]);
+              const reader = new FileReader();
 
-              const res = await fetch("/api/upload", {
-                method: "POST",
-                body: formData,
-              });
+              reader.onloadend = () => {
+                setForm({
+                  ...form,
+                  image: reader.result as string, // ✅ Base64
+                });
+              };
 
-              const data = await res.json();
-
-              setForm({
-                ...form,
-                image: data.filePath, // 🔥 MUST MATCH SCHEMA FIELD
-              });
+              reader.readAsDataURL(file);
             }}
           />
 
