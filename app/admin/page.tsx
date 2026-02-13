@@ -25,12 +25,13 @@ export default async function AdminDashboard({
 
   if (!session) redirect("/login");
 
-  if (
-    session.user.role !== "admin" &&
-    session.user.role !== "mentor"
-  ) {
-    redirect("/");
-  }
+ if (
+  !session?.user ||
+  (session.user.role !== "admin" &&
+    session.user.role !== "mentor")
+) {
+  redirect("/");
+}
 
   await connectDB();
 
