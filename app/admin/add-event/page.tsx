@@ -5,25 +5,86 @@ import { useRouter } from "next/navigation";
 
 export default function AddEventPage() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [compressedFile, setCompressedFile] = useState<File | null>(null);
 
-  const [form, setForm] = useState({
-    title: "",
-    description: "",
-    imageUrl: "",
-    location: "",
-    eventDate: "",
-    registrationDeadline: "",
-  });
+  /* ================= IMAGE COMPRESSION FUNCTION ================= */
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function compressImage(file: File): Promise<File> {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (event) => {
+        img.src = event.target?.result as string;
+      };
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+
+        const MAX_WIDTH = 1000;
+        const scaleSize = MAX_WIDTH / img.width;
+
+        canvas.width = MAX_WIDTH;
+        canvas.height = img.height * scaleSize;
+
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) return;
+
+            const compressed = new File([blob], file.name, {
+              type: "image/jpeg",
+              lastModified: Date.now(),
+            });
+
+            resolve(compressed);
+          },
+          "image/jpeg",
+          0.7 // compression quality (0.7 = 70%)
+        );
+      };
+
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /* ================= HANDLE IMAGE SELECT ================= */
+
+  async function handleImageChange(
+    e: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Create preview
+    const previewUrl = URL.createObjectURL(file);
+    setPreview(previewUrl);
+
+    // Compress image
+    const compressed = await compressImage(file);
+    setCompressedFile(compressed);
+  }
+
+  /* ================= HANDLE SUBMIT ================= */
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    setLoading(true);
+
+    const formData = new FormData(e.currentTarget);
+
+    // Replace original image with compressed image
+    if (compressedFile) {
+      formData.set("image", compressedFile);
+    }
 
     const res = await fetch("/api/events", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
+      body: formData,
     });
 
     if (res.ok) {
@@ -33,6 +94,8 @@ export default function AddEventPage() {
     } else {
       alert("Failed to create event");
     }
+
+    setLoading(false);
   }
 
   return (
@@ -42,97 +105,75 @@ export default function AddEventPage() {
           Add Event
         </h1>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-5"
+        >
           <input
-            type="text"
+            name="title"
             placeholder="Event Title"
             required
-            className="p-3 rounded bg-gray-800"
-            onChange={(e) =>
-              setForm({ ...form, title: e.target.value })
-            }
+            className="p-3 bg-gray-800 rounded"
           />
 
           <textarea
+            name="description"
             placeholder="Description"
             required
-            className="p-3 rounded bg-gray-800"
-            onChange={(e) =>
-              setForm({ ...form, description: e.target.value })
-            }
+            className="p-3 bg-gray-800 rounded"
           />
 
-          {form.imageUrl && (
-  <img
-    src={form.imageUrl}
-    className="w-32 h-32 object-cover rounded mb-4"
-  />
-)}
-
-<input
-  type="file"
-  accept="image/*"
-  className="p-3 rounded bg-gray-800"
-  onChange={async (e) => {
-    if (!e.target.files?.[0]) return;
-
-    const formData = new FormData();
-    formData.append("file", e.target.files[0]);
-
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await res.json();
-
-    setForm({
-      ...form,
-      imageUrl: data.filePath,
-    });
-  }}
-/>
-
-
           <input
-            type="text"
+            name="location"
             placeholder="Location"
             required
-            className="p-3 rounded bg-gray-800"
-            onChange={(e) =>
-              setForm({ ...form, location: e.target.value })
-            }
+            className="p-3 bg-gray-800 rounded"
           />
 
-          {/* Event Date */}
           <input
             type="date"
+            name="eventDate"
             required
-            className="p-3 rounded bg-gray-800"
-            onChange={(e) =>
-              setForm({ ...form, eventDate: e.target.value })
-            }
+            className="p-3 bg-gray-800 rounded"
           />
 
-          {/* Registration Deadline */}
           <input
             type="date"
+            name="registrationDeadline"
             required
-            className="p-3 rounded bg-gray-800"
-            onChange={(e) =>
-              setForm({
-                ...form,
-                registrationDeadline: e.target.value,
-              })
-            }
+            className="p-3 bg-gray-800 rounded"
           />
+
+          {/* IMAGE UPLOAD */}
+          <input
+            type="file"
+            name="image"
+            accept="image/*"
+            required
+            onChange={handleImageChange}
+            className="p-3 bg-gray-800 rounded"
+          />
+
+          {/* IMAGE PREVIEW */}
+          {preview && (
+            <div className="mt-4">
+              <p className="mb-2 text-sm text-gray-400">
+                Image Preview:
+              </p>
+              <img
+                src={preview}
+                alt="Preview"
+                className="w-full h-64 object-cover rounded-lg border border-gray-700"
+              />
+            </div>
+          )}
 
           <button
             type="submit"
-            className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-3 rounded"
+            disabled={loading}
+            className="bg-yellow-500 text-black py-3 rounded font-semibold hover:bg-yellow-600 transition"
           >
-            Create Event
+            {loading ? "Creating..." : "Create Event"}
           </button>
         </form>
       </div>

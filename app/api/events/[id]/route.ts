@@ -1,127 +1,55 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Event from "@/models/Event";
-import Registration from "@/models/Registration";
 import mongoose from "mongoose";
-import fs from "fs/promises";
-import path from "path";
-
-export async function GET(
-  req: Request,
-  context: { params: Promise<{ id: string }> }
-) {
-  try {
-    await connectDB();
-    const { id } = await context.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ message: "Invalid ID" }, { status: 400 });
-    }
-
-    const event = await Event.findById(id);
-
-    if (!event) {
-      return NextResponse.json({ message: "Not found" }, { status: 404 });
-    }
-
-    return NextResponse.json(event);
-  } catch (error) {
-    return NextResponse.json(
-      { message: "Fetch failed" },
-      { status: 500 }
-    );
-  }
-}
 
 export async function PUT(
   req: Request,
-  context: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
     await connectDB();
-    const { id } = await context.params;
-    const body = await req.json();
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    if (!mongoose.Types.ObjectId.isValid(params.id)) {
       return NextResponse.json({ message: "Invalid ID" }, { status: 400 });
     }
 
-    const oldEvent = await Event.findById(id);
+    const formData = await req.formData();
 
-    if (!oldEvent) {
-      return NextResponse.json({ message: "Not found" }, { status: 404 });
-    }
+    const title = formData.get("title") as string;
+    const description = formData.get("description") as string;
+    const location = formData.get("location") as string;
+    const eventDate = formData.get("eventDate") as string;
+    const registrationDeadline = formData.get("registrationDeadline") as string;
+    const imageFile = formData.get("image") as File | null;
 
-    // 🔥 delete old image if changed
-    if (
-      oldEvent.imageUrl &&
-      body.imageUrl &&
-      oldEvent.imageUrl !== body.imageUrl
-    ) {
-      const oldPath = path.join(
-        process.cwd(),
-        "public",
-        oldEvent.imageUrl
-      );
+    const updateData: any = {
+      title,
+      description,
+      location,
+      eventDate,
+      registrationDeadline,
+    };
 
-      await fs.unlink(oldPath).catch(() => {});
+    // If new image uploaded
+    if (imageFile && imageFile.size > 0) {
+      const bytes = await imageFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      updateData.imageUrl = `data:${imageFile.type};base64,${buffer.toString("base64")}`;
     }
 
     const updated = await Event.findByIdAndUpdate(
-      id,
-      body,
-      { returnDocument: "after" }
+      params.id,
+      updateData,
+      { new: true }
     );
 
     return NextResponse.json(updated);
+
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { message: "Update failed" },
-      { status: 500 }
-    );
-  }
-}
-
-export async function DELETE(
-  req: Request,
-  context: { params: Promise<{ id: string }> }
-) {
-  try {
-    await connectDB();
-    const { id } = await context.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ message: "Invalid ID" }, { status: 400 });
-    }
-
-    const event = await Event.findById(id);
-
-    if (!event) {
-      return NextResponse.json({ message: "Event not found" }, { status: 404 });
-    }
-
-    const eventId = new mongoose.Types.ObjectId(id);
-
-    // 🔥 force delete registrations
-    await Registration.deleteMany({ eventId });
-
-    // 🔥 delete event image
-    if (event.imageUrl) {
-      const filePath = path.join(
-        process.cwd(),
-        "public",
-        event.imageUrl
-      );
-
-      await fs.unlink(filePath).catch(() => {});
-    }
-
-    await Event.findByIdAndDelete(eventId);
-
-    return NextResponse.json({ message: "Deleted successfully" });
-  } catch (error) {
-    return NextResponse.json(
-      { message: "Delete failed" },
       { status: 500 }
     );
   }
