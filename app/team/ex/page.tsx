@@ -3,34 +3,45 @@
 import { useEffect, useState } from "react";
 import { roleStructure } from "@/lib/roleStructure";
 
+type Member = {
+  _id: string;
+  name: string;
+  role: string;
+  year: string;
+  status: string;
+  imageUrl: string;
+};
+
 export default function ExTeamPage() {
-  const [members, setMembers] = useState<any[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
   const [years, setYears] = useState<string[]>([]);
-  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedYear, setSelectedYear] = useState<string>("");
 
   useEffect(() => {
     async function fetchMembers() {
       const res = await fetch("/api/members");
-      const data = await res.json();
+      const data: Member[] = await res.json();
 
       const exMembers = data.filter(
-        (m: any) => m.status === "ex"
+        (m) => m.status === "ex"
       );
 
       setMembers(exMembers);
 
-     const uniqueYears: string[] = [
-  ...new Set(
-    exMembers.map((m: any) => String(m.year))
-  ),
-].sort().reverse();
+      // ✅ Strictly typed Set<string>
+      const uniqueYears = Array.from(
+        new Set<string>(
+          exMembers.map((m) => String(m.year))
+        )
+      )
+        .sort()
+        .reverse();
 
-setYears(uniqueYears);
+      setYears(uniqueYears);
 
-if (uniqueYears.length > 0) {
-  setSelectedYear(uniqueYears[0]);
-}
-
+      if (uniqueYears.length > 0) {
+        setSelectedYear(uniqueYears[0]);
+      }
     }
 
     fetchMembers();
@@ -66,8 +77,7 @@ if (uniqueYears.length > 0) {
       {/* Hierarchical Sections */}
       {roleStructure.map((section) => {
         const sectionMembers = filteredMembers.filter(
-          (m: any) =>
-            section.roles.includes(m.role)
+          (m) => section.roles.includes(m.role)
         );
 
         if (sectionMembers.length === 0)
@@ -86,17 +96,20 @@ if (uniqueYears.length > 0) {
               {section.roles.map((role) =>
                 sectionMembers
                   .filter(
-                    (m: any) => m.role === role
+                    (m) => m.role === role
                   )
-                  .map((member: any) => (
+                  .map((member) => (
                     <div
                       key={member._id}
                       className="bg-gray-900 p-5 rounded-lg"
                     >
-                      <img
-                        src={member.imageUrl}
-                        className="w-full h-48 object-cover rounded"
-                      />
+                      {member.imageUrl && (
+                        <img
+                          src={member.imageUrl}
+                          alt={member.name}
+                          className="w-full h-48 object-cover rounded"
+                        />
+                      )}
 
                       <h3 className="mt-4 font-semibold">
                         {member.name}
