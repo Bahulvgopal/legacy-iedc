@@ -21,38 +21,32 @@ export default function AddMemberPage() {
     "Mentor",
     "Chief Executive Officer",
     "Women Lead",
-
     "Chief Quality And Operation Officer",
     "Quality And Operation Officer",
-
     "Chief Technology Officer",
     "Technology Officer",
-
     "Chief Branding And Marketing Officer",
     "Branding And Marketing Officer",
-
     "Chief Finance Officer",
     "Finance Officer",
-
     "Chief Women Innovation Officer",
     "Women Innovation Officer",
-
     "Chief IPR And Research Officer",
     "IPR And Research Officer",
-
     "Chief Community Officer",
     "Community Officer",
-
     "Chief Creative And Innovation Officer",
     "Creative And Innovation Officer",
-
-    "Member" ,
-
-    "Executive curator" ,
+    "Executive Curator",
   ];
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+
+    if (!form.image) {
+      alert("Please upload an image");
+      return;
+    }
 
     const res = await fetch("/api/members", {
       method: "POST",
@@ -65,6 +59,7 @@ export default function AddMemberPage() {
     if (res.ok) {
       alert("Member added successfully");
       router.push("/admin");
+      router.refresh();
     } else {
       alert("Failed to add member");
     }
@@ -74,52 +69,60 @@ export default function AddMemberPage() {
     <main className="min-h-screen pt-28 p-8 bg-black text-white">
       <div className="max-w-2xl mx-auto bg-gray-900 p-8 rounded-xl shadow-lg">
         <h1 className="text-3xl font-bold mb-6 text-center">
-          Add New Member
+          Add Member
         </h1>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+
+          {/* Name */}
           <input
             type="text"
             placeholder="Member Name"
             required
-            className="p-3 rounded bg-gray-800 outline-none"
-            value={form.name}
+            className="p-3 rounded bg-gray-800"
             onChange={(e) =>
               setForm({ ...form, name: e.target.value })
             }
           />
 
-        <input
-  type="file"
-  accept="image/*"
-  className="p-3 rounded bg-gray-800"
-  onChange={async (e) => {
-    if (!e.target.files?.[0]) return;
+          {/* Image Preview */}
+          {form.image && (
+            <img
+              src={form.image}
+              className="w-32 h-32 object-cover rounded"
+            />
+          )}
 
-    const formData = new FormData();
-    formData.append("file", e.target.files[0]);
+          {/* Image Upload */}
+          <input
+            type="file"
+            accept="image/*"
+            required
+            className="p-3 rounded bg-gray-800"
+            onChange={async (e) => {
+              if (!e.target.files?.[0]) return;
 
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+              const formData = new FormData();
+              formData.append("file", e.target.files[0]);
 
-    const data = await res.json();
+              const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+              });
 
-    setForm({
-      ...form,
-      image: data.filePath,
-    });
-  }}
-/>
+              const data = await res.json();
 
+              setForm({
+                ...form,
+                image: data.filePath, // 🔥 MUST MATCH SCHEMA FIELD
+              });
+            }}
+          />
 
-
-
+          {/* Role */}
           <select
             required
-            className="p-3 rounded bg-gray-800 outline-none"
-            value={form.role}
+            className="p-3 rounded bg-gray-800"
             onChange={(e) =>
               setForm({ ...form, role: e.target.value })
             }
@@ -132,20 +135,20 @@ export default function AddMemberPage() {
             ))}
           </select>
 
+          {/* Year */}
           <input
             type="text"
             placeholder="Year (e.g. 2024-2025)"
             required
-            className="p-3 rounded bg-gray-800 outline-none"
-            value={form.year}
+            className="p-3 rounded bg-gray-800"
             onChange={(e) =>
               setForm({ ...form, year: e.target.value })
             }
           />
 
+          {/* Status */}
           <select
-            className="p-3 rounded bg-gray-800 outline-none"
-            value={form.status}
+            className="p-3 rounded bg-gray-800"
             onChange={(e) =>
               setForm({ ...form, status: e.target.value })
             }
@@ -154,10 +157,10 @@ export default function AddMemberPage() {
             <option value="ex">Ex Team</option>
           </select>
 
+          {/* Bio */}
           <textarea
-            placeholder="Short Bio (Optional)"
-            className="p-3 rounded bg-gray-800 outline-none"
-            value={form.bio}
+            placeholder="Short Bio"
+            className="p-3 rounded bg-gray-800"
             onChange={(e) =>
               setForm({ ...form, bio: e.target.value })
             }
@@ -165,7 +168,7 @@ export default function AddMemberPage() {
 
           <button
             type="submit"
-            className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-3 rounded transition"
+            className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-3 rounded"
           >
             Add Member
           </button>
