@@ -1,0 +1,176 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+export default function AddMemberPage() {
+  const router = useRouter();
+
+  const [form, setForm] = useState({
+    name: "",
+    imageUrl: "",
+    role: "",
+    year: "",
+    status: "current",
+    bio: "",
+  });
+
+  const roles = [
+    "Nodal Officer",
+    "Project Coordinator",
+    "Mentor",
+    "Chief Executive Officer",
+    "Women Lead",
+
+    "Chief Quality And Operation Officer",
+    "Quality And Operation Officer",
+
+    "Chief Technology Officer",
+    "Technology Officer",
+
+    "Chief Branding And Marketing Officer",
+    "Branding And Marketing Officer",
+
+    "Chief Finance Officer",
+    "Finance Officer",
+
+    "Chief Women Innovation Officer",
+    "Women Innovation Officer",
+
+    "Chief IPR And Research Officer",
+    "IPR And Research Officer",
+
+    "Chief Community Officer",
+    "Community Officer",
+
+    "Chief Creative And Innovation Officer",
+    "Creative And Innovation Officer",
+
+    "Member" ,
+
+    "Executive curator" ,
+  ];
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+
+    const res = await fetch("/api/members", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(form),
+    });
+
+    if (res.ok) {
+      alert("Member added successfully");
+      router.push("/admin");
+    } else {
+      alert("Failed to add member");
+    }
+  }
+
+  return (
+    <main className="min-h-screen pt-28 p-8 bg-black text-white">
+      <div className="max-w-2xl mx-auto bg-gray-900 p-8 rounded-xl shadow-lg">
+        <h1 className="text-3xl font-bold mb-6 text-center">
+          Add New Member
+        </h1>
+
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <input
+            type="text"
+            placeholder="Member Name"
+            required
+            className="p-3 rounded bg-gray-800 outline-none"
+            value={form.name}
+            onChange={(e) =>
+              setForm({ ...form, name: e.target.value })
+            }
+          />
+
+        <input
+  type="file"
+  accept="image/*"
+  className="p-3 rounded bg-gray-800"
+  onChange={async (e) => {
+    if (!e.target.files?.[0]) return;
+
+    const formData = new FormData();
+    formData.append("file", e.target.files[0]);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    setForm({
+      ...form,
+      imageUrl: data.filePath,
+    });
+  }}
+/>
+
+
+
+
+          <select
+            required
+            className="p-3 rounded bg-gray-800 outline-none"
+            value={form.role}
+            onChange={(e) =>
+              setForm({ ...form, role: e.target.value })
+            }
+          >
+            <option value="">Select Role</option>
+            {roles.map((role, index) => (
+              <option key={index} value={role}>
+                {role}
+              </option>
+            ))}
+          </select>
+
+          <input
+            type="text"
+            placeholder="Year (e.g. 2024-2025)"
+            required
+            className="p-3 rounded bg-gray-800 outline-none"
+            value={form.year}
+            onChange={(e) =>
+              setForm({ ...form, year: e.target.value })
+            }
+          />
+
+          <select
+            className="p-3 rounded bg-gray-800 outline-none"
+            value={form.status}
+            onChange={(e) =>
+              setForm({ ...form, status: e.target.value })
+            }
+          >
+            <option value="current">Current Team</option>
+            <option value="ex">Ex Team</option>
+          </select>
+
+          <textarea
+            placeholder="Short Bio (Optional)"
+            className="p-3 rounded bg-gray-800 outline-none"
+            value={form.bio}
+            onChange={(e) =>
+              setForm({ ...form, bio: e.target.value })
+            }
+          />
+
+          <button
+            type="submit"
+            className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-3 rounded transition"
+          >
+            Add Member
+          </button>
+        </form>
+      </div>
+    </main>
+  );
+}
