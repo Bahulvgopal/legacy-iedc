@@ -4,14 +4,14 @@ import Event from "@/models/Event";
 import mongoose from "mongoose";
 import { notFound } from "next/navigation";
 
-export default async function EventDetailsPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+export default async function EventDetailsPage(
+  props: {
+    params: Promise<{ id: string }>;
+  }
+) {
   await connectDB();
 
-  const { id } = await params;
+  const { id } = await props.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return notFound();
@@ -29,7 +29,7 @@ export default async function EventDetailsPage({
   return (
     <main className="min-h-screen pt-24 p-10">
 
-      {/* 🔥 Event Info Section */}
+      {/* EVENT INFO */}
       <div className="mb-10 bg-gray-900 p-6 rounded-xl shadow-lg">
         {event.image && (
           <img
@@ -52,9 +52,8 @@ export default async function EventDetailsPage({
         </p>
       </div>
 
-      {/* 🔥 Registrations Section */}
+      {/* REGISTRATIONS */}
       <div className="bg-gray-900 p-6 rounded-xl shadow-lg">
-
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold">
             Registrations ({registrations.length})

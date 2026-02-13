@@ -1,56 +1,98 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongodb";
 import Event from "@/models/Event";
+import Registration from "@/models/Registration";
 import mongoose from "mongoose";
+
+/* ================= GET SINGLE EVENT ================= */
+
+export async function GET(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  await connectDB();
+
+  const { id } = await context.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json(
+      { message: "Invalid ID" },
+      { status: 400 }
+    );
+  }
+
+  const event = await Event.findById(id);
+
+  if (!event) {
+    return NextResponse.json(
+      { message: "Event not found" },
+      { status: 404 }
+    );
+  }
+
+  return NextResponse.json(event);
+}
+
+/* ================= UPDATE EVENT ================= */
 
 export async function PUT(
   req: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  try {
-    await connectDB();
+  await connectDB();
 
-    if (!mongoose.Types.ObjectId.isValid(params.id)) {
-      return NextResponse.json({ message: "Invalid ID" }, { status: 400 });
-    }
+  const { id } = await context.params;
+  const body = await req.json();
 
-    const formData = await req.formData();
-
-    const title = formData.get("title") as string;
-    const description = formData.get("description") as string;
-    const location = formData.get("location") as string;
-    const eventDate = formData.get("eventDate") as string;
-    const registrationDeadline = formData.get("registrationDeadline") as string;
-    const imageFile = formData.get("image") as File | null;
-
-    const updateData: any = {
-      title,
-      description,
-      location,
-      eventDate,
-      registrationDeadline,
-    };
-
-    // If new image uploaded
-    if (imageFile && imageFile.size > 0) {
-      const bytes = await imageFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      updateData.image = `data:${imageFile.type};base64,${buffer.toString("base64")}`;
-    }
-
-    const updated = await Event.findByIdAndUpdate(
-      params.id,
-      updateData,
-      { new: true }
-    );
-
-    return NextResponse.json(updated);
-
-  } catch (error) {
-    console.error(error);
+  if (!mongoose.Types.ObjectId.isValid(id)) {
     return NextResponse.json(
-      { message: "Update failed" },
-      { status: 500 }
+      { message: "Invalid ID" },
+      { status: 400 }
     );
   }
+
+  const updated = await Event.findByIdAndUpdate(
+    id,
+    body,
+    { returnDocument: "after" }
+  );
+
+  return NextResponse.json(updated);
+}
+
+/* ================= DELETE EVENT ================= */
+
+export async function DELETE(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  await connectDB();
+
+  const { id } = await context.params;
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json(
+      { message: "Invalid ID" },
+      { status: 400 }
+    );
+  }
+
+  const eventId = new mongoose.Types.ObjectId(id);
+
+  // Delete registrations first
+  await Registration.deleteMany({ eventId });
+
+  // Delete event
+  const deleted = await Event.findByIdAndDelete(eventId);
+
+  if (!deleted) {
+    return NextResponse.json(
+      { message: "Event not found" },
+      { status: 404 }
+    );
+  }
+
+  return NextResponse.json({
+    message: "Deleted successfully",
+  });
 }

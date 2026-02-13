@@ -6,7 +6,9 @@ import { useRouter, useParams } from "next/navigation";
 export default function EditMemberPage() {
   const router = useRouter();
   const params = useParams();
-  const id = params.id as string;
+  const id = params?.id as string;
+
+  const [loading, setLoading] = useState(true);
 
   const [form, setForm] = useState({
     name: "",
@@ -39,20 +41,31 @@ export default function EditMemberPage() {
     "Community Officer",
     "Chief Creative And Innovation Officer",
     "Creative And Innovation Officer",
-    "Member" ,
-    "Executive curator" ,
+    "Executive Curator",
+    "Member",
   ];
 
-  // 🔥 Fetch existing member
+  /* ================= FETCH MEMBER ================= */
+
   useEffect(() => {
     async function fetchMember() {
-      const res = await fetch(`/api/members/${id}`);
-      const data = await res.json();
-      setForm(data);
+      try {
+        const res = await fetch(`/api/members/${id}`);
+        if (!res.ok) return;
+
+        const data = await res.json();
+        setForm(data);
+      } catch (err) {
+        console.error("Failed to fetch member");
+      } finally {
+        setLoading(false);
+      }
     }
 
     if (id) fetchMember();
   }, [id]);
+
+  /* ================= SUBMIT ================= */
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -72,6 +85,14 @@ export default function EditMemberPage() {
     } else {
       alert("Update failed");
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="pt-32 text-center text-white">
+        Loading...
+      </div>
+    );
   }
 
   return (
@@ -94,36 +115,38 @@ export default function EditMemberPage() {
             className="p-3 rounded bg-gray-800 outline-none"
           />
 
+          {/* IMAGE PREVIEW */}
           {form.image && (
-  <img
-    src={form.image}
-    className="w-32 h-32 object-cover rounded mb-4"
-  />
-)}
+            <img
+              src={form.image}
+              className="w-32 h-32 object-cover rounded"
+            />
+          )}
 
-<input
-  type="file"
-  accept="image/*"
-  className="p-3 rounded bg-gray-800"
-  onChange={async (e) => {
-    if (!e.target.files?.[0]) return;
+          {/* IMAGE UPLOAD */}
+          <input
+            type="file"
+            accept="image/*"
+            className="p-3 rounded bg-gray-800"
+            onChange={async (e) => {
+              if (!e.target.files?.[0]) return;
 
-    const formData = new FormData();
-    formData.append("file", e.target.files[0]);
+              const formData = new FormData();
+              formData.append("file", e.target.files[0]);
 
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+              const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+              });
 
-    const data = await res.json();
+              const data = await res.json();
 
-    setForm({
-      ...form,
-      image: data.filePath,
-    });
-  }}
-/>
+              setForm({
+                ...form,
+                image: data.filePath,
+              });
+            }}
+          />
 
           <select
             value={form.role}
