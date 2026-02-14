@@ -1,6 +1,8 @@
 import { connectDB } from "@/lib/mongodb";
 import Event from "@/models/Event";
 
+export const dynamic = "force-dynamic"; // 🔥 IMPORTANT
+
 export default async function UpcomingEventsPage() {
   await connectDB();
 
@@ -23,9 +25,8 @@ export default async function UpcomingEventsPage() {
           {events.map((event: any) => (
             <div
               key={event._id}
-              className="bg-gray-900 p-6 rounded-lg shadow-lg"
+              className="bg-gray-900 p-6 rounded-lg"
             >
-              {/* 🔥 Image (Base64 upload support) */}
               {event.image && (
                 <img
                   src={event.image}
@@ -38,7 +39,7 @@ export default async function UpcomingEventsPage() {
                 {event.title}
               </h2>
 
-              <p className="text-gray-400 mt-2">
+              <p className="text-gray-400">
                 {event.description}
               </p>
 
@@ -46,17 +47,14 @@ export default async function UpcomingEventsPage() {
                 📍 {event.location}
               </p>
 
-              <p className="mt-1">
-                📅{" "}
-                {new Date(event.eventDate).toDateString()}
+              <p>
+                📅 {new Date(event.eventDate).toDateString()}
               </p>
 
-              {/* 🔥 Registration Status */}
-              {new Date(event.registrationDeadline) >=
-              new Date() ? (
+              {new Date(event.registrationDeadline) >= new Date() ? (
                 <a
                   href={`/events/register/${event._id}`}
-                  className="inline-block mt-4 bg-blue-600 px-4 py-2 rounded hover:bg-blue-700 transition"
+                  className="inline-block mt-4 bg-blue-600 px-4 py-2 rounded"
                 >
                   Register
                 </a>
