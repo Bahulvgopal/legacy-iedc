@@ -5,175 +5,153 @@ import { useRouter } from "next/navigation";
 
 export default function AddEventPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
-  const [compressedFile, setCompressedFile] = useState<File | null>(null);
 
-  /* ================= IMAGE COMPRESSION FUNCTION ================= */
+  const [form, setForm] = useState({
+    title: "",
+    description: "",
+    image: "",
+    location: "",
+    eventDate: "",
+    registrationDeadline: "",
+  });
 
-  async function compressImage(file: File): Promise<File> {
-    return new Promise((resolve) => {
-      const img = new Image();
-      const reader = new FileReader();
+  const [uploading, setUploading] = useState(false);
 
-      reader.onload = (event) => {
-        img.src = event.target?.result as string;
-      };
+  async function handleImageUpload(file: File) {
+    const reader = new FileReader();
 
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
+    reader.onloadend = async () => {
+      setUploading(true);
 
-        const MAX_WIDTH = 1000;
-        const scaleSize = MAX_WIDTH / img.width;
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: reader.result }),
+      });
 
-        canvas.width = MAX_WIDTH;
-        canvas.height = img.height * scaleSize;
+      const data = await res.json();
 
-        const ctx = canvas.getContext("2d");
-        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+      setForm((prev) => ({
+        ...prev,
+        image: data.url,
+      }));
 
-        canvas.toBlob(
-          (blob) => {
-            if (!blob) return;
+      setUploading(false);
+    };
 
-            const compressed = new File([blob], file.name, {
-              type: "image/jpeg",
-              lastModified: Date.now(),
-            });
-
-            resolve(compressed);
-          },
-          "image/jpeg",
-          0.7 // compression quality (0.7 = 70%)
-        );
-      };
-
-      reader.readAsDataURL(file);
-    });
+    reader.readAsDataURL(file);
   }
 
-  /* ================= HANDLE IMAGE SELECT ================= */
-
-  async function handleImageChange(
-    e: React.ChangeEvent<HTMLInputElement>
-  ) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    // Create preview
-    const previewUrl = URL.createObjectURL(file);
-    setPreview(previewUrl);
-
-    // Compress image
-    const compressed = await compressImage(file);
-    setCompressedFile(compressed);
-  }
-
-  /* ================= HANDLE SUBMIT ================= */
-
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-
-    // Replace original image with compressed image
-    if (compressedFile) {
-      formData.set("image", compressedFile);
+    if (!form.image) {
+      alert("Upload image");
+      return;
     }
 
     const res = await fetch("/api/events", {
       method: "POST",
-      body: formData,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
     });
 
     if (res.ok) {
-      alert("Event created successfully");
+      alert("Event created");
       router.push("/admin");
       router.refresh();
-    } else {
-      alert("Failed to create event");
     }
-
-    setLoading(false);
   }
 
   return (
     <main className="min-h-screen pt-28 p-8 bg-black text-white">
-      <div className="max-w-2xl mx-auto bg-gray-900 p-8 rounded-xl shadow-lg">
+      <div className="max-w-2xl mx-auto bg-gray-900 p-8 rounded-xl">
         <h1 className="text-3xl font-bold mb-6 text-center">
           Add Event
         </h1>
 
-        <form
-          onSubmit={handleSubmit}
-          className="flex flex-col gap-5"
-        >
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+
           <input
-            name="title"
-            placeholder="Event Title"
+            type="text"
+            placeholder="Title"
             required
-            className="p-3 bg-gray-800 rounded"
+            className="p-3 rounded bg-gray-800"
+            onChange={(e) =>
+              setForm({ ...form, title: e.target.value })
+            }
           />
 
           <textarea
-            name="description"
             placeholder="Description"
             required
-            className="p-3 bg-gray-800 rounded"
+            className="p-3 rounded bg-gray-800"
+            onChange={(e) =>
+              setForm({
+                ...form,
+                description: e.target.value,
+              })
+            }
           />
 
-          <input
-            name="location"
-            placeholder="Location"
-            required
-            className="p-3 bg-gray-800 rounded"
-          />
+          {form.image && (
+            <img
+              src={form.image}
+              className="w-full h-48 rounded object-cover"
+              alt="preview"
+            />
+          )}
 
-          <input
-            type="date"
-            name="eventDate"
-            required
-            className="p-3 bg-gray-800 rounded"
-          />
-
-          <input
-            type="date"
-            name="registrationDeadline"
-            required
-            className="p-3 bg-gray-800 rounded"
-          />
-
-          {/* IMAGE UPLOAD */}
           <input
             type="file"
-            name="image"
             accept="image/*"
-            required
-            onChange={handleImageChange}
-            className="p-3 bg-gray-800 rounded"
+            className="p-3 rounded bg-gray-800"
+            onChange={(e) =>
+              e.target.files &&
+              handleImageUpload(e.target.files[0])
+            }
           />
 
-          {/* IMAGE PREVIEW */}
-          {preview && (
-            <div className="mt-4">
-              <p className="mb-2 text-sm text-gray-400">
-                Image Preview:
-              </p>
-              <img
-                src={preview}
-                alt="Preview"
-                className="w-full h-64 object-cover rounded-lg border border-gray-700"
-              />
-            </div>
+          {uploading && (
+            <p className="text-yellow-500">Uploading...</p>
           )}
+
+          <input
+            type="text"
+            placeholder="Location"
+            required
+            className="p-3 rounded bg-gray-800"
+            onChange={(e) =>
+              setForm({ ...form, location: e.target.value })
+            }
+          />
+
+          <input
+            type="date"
+            required
+            className="p-3 rounded bg-gray-800"
+            onChange={(e) =>
+              setForm({ ...form, eventDate: e.target.value })
+            }
+          />
+
+          <input
+            type="date"
+            required
+            className="p-3 rounded bg-gray-800"
+            onChange={(e) =>
+              setForm({
+                ...form,
+                registrationDeadline: e.target.value,
+              })
+            }
+          />
 
           <button
             type="submit"
-            disabled={loading}
-            className="bg-yellow-500 text-black py-3 rounded font-semibold hover:bg-yellow-600 transition"
+            className="bg-yellow-500 text-black py-3 rounded"
           >
-            {loading ? "Creating..." : "Create Event"}
+            Create Event
           </button>
         </form>
       </div>

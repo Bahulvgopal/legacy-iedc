@@ -15,69 +15,114 @@ export default function AddMemberPage() {
     bio: "",
   });
 
-  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const roles = [
     "Nodal Officer",
     "Project Coordinator",
     "Mentor",
+
     "Chief Executive Officer",
     "Women Lead",
+
     "Chief Quality And Operation Officer",
     "Quality And Operation Officer",
+
     "Chief Technology Officer",
     "Technology Officer",
+
     "Chief Branding And Marketing Officer",
     "Branding And Marketing Officer",
+
     "Chief Finance Officer",
     "Finance Officer",
+
     "Chief Women Innovation Officer",
     "Women Innovation Officer",
+
     "Chief IPR And Research Officer",
     "IPR And Research Officer",
+
     "Chief Community Officer",
     "Community Officer",
+
     "Chief Creative And Innovation Officer",
     "Creative And Innovation Officer",
+
     "Executive Curator",
     "Member",
   ];
+
+  /* ================= IMAGE UPLOAD ================= */
+
+  async function handleImageUpload(file: File) {
+    const reader = new FileReader();
+
+    reader.onloadend = async () => {
+      try {
+        setUploading(true);
+
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image: reader.result }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert("Image upload failed");
+          return;
+        }
+
+        setForm((prev) => ({
+          ...prev,
+          image: data.url,
+        }));
+      } catch (error) {
+        console.error(error);
+        alert("Upload error");
+      } finally {
+        setUploading(false);
+      }
+    };
+
+    reader.readAsDataURL(file);
+  }
+
+  /* ================= SUBMIT ================= */
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
     if (!form.image) {
-      alert("Please upload an image");
+      alert("Please upload image");
       return;
     }
 
     try {
-      setLoading(true);
+      setSubmitting(true);
 
       const res = await fetch("/api/members", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || "Failed to add member");
-        setLoading(false);
-        return;
+      if (res.ok) {
+        alert("Member added successfully");
+        router.push("/admin");
+        router.refresh();
+      } else {
+        const err = await res.json();
+        alert(err.message || "Failed to add member");
       }
-
-      alert("Member added successfully");
-      router.push("/admin");
-      router.refresh();
     } catch (error) {
-      alert("Something went wrong");
       console.error(error);
+      alert("Something went wrong");
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   }
 
@@ -90,53 +135,46 @@ export default function AddMemberPage() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
+          {/* NAME */}
           <input
             type="text"
             placeholder="Member Name"
             required
-            className="p-3 rounded bg-gray-800"
-            value={form.name}
+            className="p-3 rounded bg-gray-800 outline-none"
             onChange={(e) =>
               setForm({ ...form, name: e.target.value })
             }
           />
 
-          {/* Image Preview */}
+          {/* IMAGE PREVIEW */}
           {form.image && (
             <img
               src={form.image}
-              className="w-32 h-32 object-cover rounded"
-              alt="Preview"
+              className="w-32 h-32 rounded-full object-cover border border-gray-700"
+              alt="preview"
             />
           )}
 
-          {/* Base64 Image Upload */}
+          {/* IMAGE UPLOAD */}
           <input
             type="file"
             accept="image/*"
-            required
             className="p-3 rounded bg-gray-800"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
-
-              const reader = new FileReader();
-
-              reader.onloadend = () => {
-                setForm((prev) => ({
-                  ...prev,
-                  image: reader.result as string,
-                }));
-              };
-
-              reader.readAsDataURL(file);
-            }}
+            onChange={(e) =>
+              e.target.files &&
+              handleImageUpload(e.target.files[0])
+            }
           />
 
+          {uploading && (
+            <p className="text-yellow-500">Uploading image...</p>
+          )}
+
+          {/* ROLE DROPDOWN */}
           <select
             required
             value={form.role}
-            className="p-3 rounded bg-gray-800"
+            className="p-3 rounded bg-gray-800 outline-none"
             onChange={(e) =>
               setForm({ ...form, role: e.target.value })
             }
@@ -149,20 +187,21 @@ export default function AddMemberPage() {
             ))}
           </select>
 
+          {/* YEAR */}
           <input
             type="text"
             placeholder="Year (e.g. 2024-2025)"
             required
-            value={form.year}
-            className="p-3 rounded bg-gray-800"
+            className="p-3 rounded bg-gray-800 outline-none"
             onChange={(e) =>
               setForm({ ...form, year: e.target.value })
             }
           />
 
+          {/* STATUS */}
           <select
             value={form.status}
-            className="p-3 rounded bg-gray-800"
+            className="p-3 rounded bg-gray-800 outline-none"
             onChange={(e) =>
               setForm({ ...form, status: e.target.value })
             }
@@ -171,21 +210,22 @@ export default function AddMemberPage() {
             <option value="ex">Ex Team</option>
           </select>
 
+          {/* BIO */}
           <textarea
-            placeholder="Short Bio"
-            value={form.bio}
-            className="p-3 rounded bg-gray-800"
+            placeholder="Short Bio (Optional)"
+            className="p-3 rounded bg-gray-800 outline-none"
             onChange={(e) =>
               setForm({ ...form, bio: e.target.value })
             }
           />
 
+          {/* SUBMIT */}
           <button
             type="submit"
-            disabled={loading}
-            className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-3 rounded"
+            disabled={uploading || submitting}
+            className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-3 rounded transition disabled:opacity-50"
           >
-            {loading ? "Adding..." : "Add Member"}
+            {submitting ? "Adding..." : "Add Member"}
           </button>
         </form>
       </div>

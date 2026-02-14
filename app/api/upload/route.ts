@@ -1,40 +1,29 @@
-import { NextRequest, NextResponse } from "next/server";
-import path from "path";
-import fs from "fs/promises";
-import crypto from "crypto";
+import { NextResponse } from "next/server";
+import cloudinary from "@/lib/cloudinary";
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   try {
-    const data = await req.formData();
-    const file = data.get("file") as File;
+    const body = await req.json();
+    const { image } = body;
 
-    if (!file) {
+    if (!image) {
       return NextResponse.json(
-        { message: "No file uploaded" },
+        { message: "No image provided" },
         { status: 400 }
       );
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    const uploadDir = path.join(process.cwd(), "public/uploads");
-    await fs.mkdir(uploadDir, { recursive: true });
-
-    // 🔥 unique filename
-    const ext = file.name.split(".").pop();
-    const uniqueName =
-      crypto.randomUUID() + "." + ext;
-
-    const filePath = path.join(uploadDir, uniqueName);
-
-    await fs.writeFile(filePath, buffer);
+    const uploaded = await cloudinary.uploader.upload(image, {
+      folder: "legacy-iedc",
+      resource_type: "image",
+    });
 
     return NextResponse.json({
-      message: "Upload successful",
-      filePath: `/uploads/${uniqueName}`,
+      url: uploaded.secure_url,
+      public_id: uploaded.public_id,
     });
   } catch (error) {
+    console.error(error);
     return NextResponse.json(
       { message: "Upload failed" },
       { status: 500 }
