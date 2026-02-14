@@ -9,6 +9,8 @@ export default function EditMemberPage() {
   const id = params?.id as string;
 
   const [loading, setLoading] = useState(true);
+  const [uploading, setUploading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -20,187 +22,220 @@ export default function EditMemberPage() {
   });
 
   const roles = [
-    "Nodal Officer",
-    "Project Coordinator",
-    "Mentor",
-    "Chief Executive Officer",
-    "Women Lead",
-    "Chief Quality And Operation Officer",
-    "Quality And Operation Officer",
-    "Chief Technology Officer",
-    "Technology Officer",
-    "Chief Branding And Marketing Officer",
-    "Branding And Marketing Officer",
-    "Chief Finance Officer",
-    "Finance Officer",
-    "Chief Women Innovation Officer",
-    "Women Innovation Officer",
-    "Chief IPR And Research Officer",
-    "IPR And Research Officer",
-    "Chief Community Officer",
-    "Community Officer",
-    "Chief Creative And Innovation Officer",
-    "Creative And Innovation Officer",
-    "Executive Curator",
-    "Member",
+    "Nodal Officer", "Project Coordinator", "Mentor",
+    "Chief Executive Officer", "Women Lead",
+    "Chief Quality And Operation Officer", "Quality And Operation Officer",
+    "Chief Technology Officer", "Technology Officer",
+    "Chief Branding And Marketing Officer", "Branding And Marketing Officer",
+    "Chief Finance Officer", "Finance Officer",
+    "Chief Women Innovation Officer", "Women Innovation Officer",
+    "Chief IPR And Research Officer", "IPR And Research Officer",
+    "Chief Community Officer", "Community Officer",
+    "Chief Creative And Innovation Officer", "Creative And Innovation Officer",
+    "Executive Curator", "Member",
   ];
 
   /* ================= FETCH MEMBER ================= */
-
   useEffect(() => {
     async function fetchMember() {
       try {
         const res = await fetch(`/api/members/${id}`);
-        if (!res.ok) return;
-
+        if (!res.ok) throw new Error();
         const data = await res.json();
         setForm(data);
       } catch (err) {
         console.error("Failed to fetch member");
+        alert("Member not found");
+        router.push("/admin");
       } finally {
         setLoading(false);
       }
     }
-
     if (id) fetchMember();
-  }, [id]);
+  }, [id, router]);
+
+  /* ================= IMAGE UPLOAD ================= */
+  async function handleImageUpload(file: File) {
+    if (!file) return;
+    try {
+      setUploading(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData, // Sending as FormData
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error();
+
+      // Ensure we use the correct key from your API response (filePath or url)
+      setForm((prev) => ({ ...prev, image: data.filePath || data.url }));
+    } catch (error) {
+      alert("Image upload failed");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   /* ================= SUBMIT ================= */
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    try {
+      setSubmitting(true);
+      const res = await fetch(`/api/members/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-    const res = await fetch(`/api/members/${id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
-
-    if (res.ok) {
-      alert("Member updated successfully");
-      router.push("/admin");
-      router.refresh();
-    } else {
+      if (res.ok) {
+        alert("Member updated successfully");
+        router.push("/admin");
+        router.refresh();
+      } else {
+        throw new Error();
+      }
+    } catch (error) {
       alert("Update failed");
+    } finally {
+      setSubmitting(false);
     }
   }
 
   if (loading) {
     return (
-      <div className="pt-32 text-center text-white">
-        Loading...
+      <div className="min-h-screen flex flex-col items-center justify-center bg-black text-white">
+        <div className="w-10 h-10 border-4 border-yellow-500 border-t-transparent animate-spin rounded-full mb-4"></div>
+        <p className="text-gray-400 animate-pulse">Fetching member details...</p>
       </div>
     );
   }
 
   return (
-    <main className="min-h-screen pt-28 p-8 bg-black text-white">
-      <div className="max-w-2xl mx-auto bg-gray-900 p-8 rounded-xl shadow-lg">
-        <h1 className="text-3xl font-bold mb-6 text-center">
-          Edit Member
-        </h1>
+    <main className="min-h-screen pt-24 pb-12 px-4 md:px-8 bg-black text-white flex justify-center items-start">
+      <div className="w-full max-w-2xl bg-gray-900 p-6 md:p-10 rounded-2xl shadow-2xl border border-gray-800">
+        
+        <header className="mb-8 text-center">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-white">
+            Edit Member <span className="text-yellow-500 font-light">|</span>
+          </h1>
+          <p className="text-gray-400 mt-2 text-sm">Update the profile information for {form.name}.</p>
+        </header>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          
+          {/* PROFILE IMAGE SECTION */}
+          <div className="flex flex-col items-center gap-4 bg-gray-800/30 p-6 rounded-xl border border-gray-800">
+            <div className="relative group">
+              <img
+                src={form.image || "https://via.placeholder.com/150"}
+                className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-gray-700 shadow-xl group-hover:border-yellow-500 transition-all"
+                alt="preview"
+              />
+              {uploading && (
+                <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center">
+                  <div className="w-6 h-6 border-2 border-yellow-500 border-t-transparent animate-spin rounded-full"></div>
+                </div>
+              )}
+            </div>
 
-          <input
-            type="text"
-            value={form.name}
-            onChange={(e) =>
-              setForm({ ...form, name: e.target.value })
-            }
-            placeholder="Member Name"
-            required
-            className="p-3 rounded bg-gray-800 outline-none"
-          />
+            <label className="cursor-pointer bg-gray-800 hover:bg-gray-700 px-5 py-2 rounded-full text-xs font-semibold tracking-wide transition-colors border border-gray-600">
+              {uploading ? "UPLOADING..." : "REPLACE PHOTO"}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => e.target.files && handleImageUpload(e.target.files[0])}
+                disabled={uploading}
+              />
+            </label>
+          </div>
 
-          {/* IMAGE PREVIEW */}
-          {form.image && (
-            <img
-              src={form.image}
-              className="w-32 h-32 object-cover rounded"
-            />
-          )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {/* NAME */}
+            <div className="flex flex-col gap-2 md:col-span-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Full Name</label>
+              <input
+                type="text"
+                value={form.name}
+                required
+                className="p-3.5 rounded-xl bg-gray-800 border border-gray-700 focus:border-yellow-500 outline-none transition-all"
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+            </div>
 
-          {/* IMAGE UPLOAD */}
-          <input
-            type="file"
-            accept="image/*"
-            className="p-3 rounded bg-gray-800"
-            onChange={async (e) => {
-              if (!e.target.files?.[0]) return;
+            {/* ROLE */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Role</label>
+              <select
+                value={form.role}
+                required
+                className="p-3.5 rounded-xl bg-gray-800 border border-gray-700 focus:border-yellow-500 outline-none cursor-pointer appearance-none"
+                onChange={(e) => setForm({ ...form, role: e.target.value })}
+              >
+                <option value="">Select Role</option>
+                {roles.map((role, index) => (
+                  <option key={index} value={role}>{role}</option>
+                ))}
+              </select>
+            </div>
 
-              const formData = new FormData();
-              formData.append("file", e.target.files[0]);
+            {/* YEAR */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Year</label>
+              <input
+                type="text"
+                value={form.year}
+                required
+                className="p-3.5 rounded-xl bg-gray-800 border border-gray-700 focus:border-yellow-500 outline-none"
+                onChange={(e) => setForm({ ...form, year: e.target.value })}
+              />
+            </div>
 
-              const res = await fetch("/api/upload", {
-                method: "POST",
-                body: formData,
-              });
+            {/* STATUS */}
+            <div className="flex flex-col gap-2 md:col-span-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Team Status</label>
+              <select
+                value={form.status}
+                className="p-3.5 rounded-xl bg-gray-800 border border-gray-700 focus:border-yellow-500 outline-none cursor-pointer"
+                onChange={(e) => setForm({ ...form, status: e.target.value })}
+              >
+                <option value="current">Current Team</option>
+                <option value="ex">Ex Team</option>
+              </select>
+            </div>
 
-              const data = await res.json();
+            {/* BIO */}
+            <div className="flex flex-col gap-2 md:col-span-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Bio</label>
+              <textarea
+                value={form.bio}
+                rows={3}
+                className="p-3.5 rounded-xl bg-gray-800 border border-gray-700 focus:border-yellow-500 outline-none resize-none"
+                onChange={(e) => setForm({ ...form, bio: e.target.value })}
+              />
+            </div>
+          </div>
 
-              setForm({
-                ...form,
-                image: data.filePath,
-              });
-            }}
-          />
-
-          <select
-            value={form.role}
-            onChange={(e) =>
-              setForm({ ...form, role: e.target.value })
-            }
-            required
-            className="p-3 rounded bg-gray-800 outline-none"
-          >
-            <option value="">Select Role</option>
-            {roles.map((role, index) => (
-              <option key={index} value={role}>
-                {role}
-              </option>
-            ))}
-          </select>
-
-          <input
-            type="text"
-            value={form.year}
-            onChange={(e) =>
-              setForm({ ...form, year: e.target.value })
-            }
-            placeholder="Year (e.g. 2024-2025)"
-            required
-            className="p-3 rounded bg-gray-800 outline-none"
-          />
-
-          <select
-            value={form.status}
-            onChange={(e) =>
-              setForm({ ...form, status: e.target.value })
-            }
-            className="p-3 rounded bg-gray-800 outline-none"
-          >
-            <option value="current">Current Team</option>
-            <option value="ex">Ex Team</option>
-          </select>
-
-          <textarea
-            value={form.bio}
-            onChange={(e) =>
-              setForm({ ...form, bio: e.target.value })
-            }
-            placeholder="Short Bio (Optional)"
-            className="p-3 rounded bg-gray-800 outline-none"
-          />
-
-          <button
-            type="submit"
-            className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-3 rounded transition"
-          >
-            Update Member
-          </button>
+          {/* ACTION BUTTONS */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-6">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="w-full sm:w-1/3 py-3.5 rounded-xl font-bold text-gray-400 border border-gray-800 hover:bg-gray-800 transition-all"
+            >
+              CANCEL
+            </button>
+            <button
+              type="submit"
+              disabled={uploading || submitting}
+              className="w-full sm:w-2/3 bg-yellow-500 hover:bg-yellow-400 disabled:opacity-50 text-black font-black py-3.5 rounded-xl transition-all shadow-xl shadow-yellow-500/10"
+            >
+              {submitting ? "SAVING CHANGES..." : "UPDATE MEMBER PROFILE"}
+            </button>
+          </div>
         </form>
       </div>
     </main>
