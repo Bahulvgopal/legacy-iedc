@@ -3,37 +3,51 @@
 import { useEffect, useState } from "react";
 import { roleStructure } from "@/lib/roleStructure";
 
+interface Member {
+  _id: string;
+  name: string;
+  image?: string;
+  role: string;
+  year: string;
+  status: string;
+  bio?: string;
+}
+
 export default function ExTeamPage() {
-  const [members, setMembers] = useState<any[]>([]);
+  const [members, setMembers] = useState<Member[]>([]);
   const [years, setYears] = useState<string[]>([]);
-  const [selectedYear, setSelectedYear] = useState("");
+  const [selectedYear, setSelectedYear] = useState<string>("");
 
   useEffect(() => {
     async function fetchMembers() {
-      const res = await fetch("/api/members");
-      const data = await res.json();
+      try {
+        const res = await fetch("/api/members");
+        const data: Member[] = await res.json();
 
-      const exMembers = data.filter(
-        (m: any) => m.status === "ex"
-      );
+        const exMembers = data.filter(
+          (m) => m.status === "ex"
+        );
 
-      setMembers(exMembers);
+        setMembers(exMembers);
 
-      // 🔥 Proper numeric sorting by first year
-      const uniqueYears = [
-        ...new Set(
-          exMembers.map((m: any) => String(m.year))
-        ),
-      ].sort((a, b) => {
-        const yearA = parseInt(a.split("-")[0]);
-        const yearB = parseInt(b.split("-")[0]);
-        return yearB - yearA; // newest first
-      });
+        // ✅ Unique years sorted newest first
+        const uniqueYears: string[] = Array.from(
+          new Set<string>(
+            exMembers.map((m) => String(m.year))
+          )
+        ).sort((a: string, b: string) => {
+          const yearA = parseInt(a.split("-")[0]);
+          const yearB = parseInt(b.split("-")[0]);
+          return yearB - yearA;
+        });
 
-      setYears(uniqueYears);
+        setYears(uniqueYears);
 
-      if (uniqueYears.length > 0) {
-        setSelectedYear(uniqueYears[0]);
+        if (uniqueYears.length > 0) {
+          setSelectedYear(uniqueYears[0]);
+        }
+      } catch (error) {
+        console.error("Failed to fetch members", error);
       }
     }
 
@@ -51,27 +65,28 @@ export default function ExTeamPage() {
       </h1>
 
       {/* Year Selector */}
-      <div className="mb-10">
-        <select
-          value={selectedYear}
-          onChange={(e) =>
-            setSelectedYear(e.target.value)
-          }
-          className="px-4 py-2 rounded bg-gray-800 text-white"
-        >
-          {years.map((year) => (
-            <option key={year} value={year}>
-              {year}
-            </option>
-          ))}
-        </select>
-      </div>
+      {years.length > 0 && (
+        <div className="mb-10">
+          <select
+            value={selectedYear}
+            onChange={(e) =>
+              setSelectedYear(e.target.value)
+            }
+            className="px-4 py-2 rounded bg-gray-800 text-white"
+          >
+            {years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
-      {/* Role Based Sections */}
+      {/* Role-Based Sections */}
       {roleStructure.map((section) => {
         const sectionMembers = filteredMembers.filter(
-          (m: any) =>
-            section.roles.includes(m.role)
+          (m) => section.roles.includes(m.role)
         );
 
         if (sectionMembers.length === 0)
@@ -89,24 +104,22 @@ export default function ExTeamPage() {
             <div className="grid md:grid-cols-3 gap-6">
               {section.roles.map((role) =>
                 sectionMembers
-                  .filter(
-                    (m: any) => m.role === role
-                  )
-                  .map((member: any) => (
+                  .filter((m) => m.role === role)
+                  .map((member) => (
                     <div
                       key={member._id}
-                      className="bg-gray-900 p-5 rounded-lg"
+                      className="bg-gray-900 p-5 rounded-lg shadow-lg hover:shadow-xl transition"
                     >
-                      {/* ✅ Correct field */}
-                      {member.image && (
-                        <img
-                          src={member.image}
-                          alt={member.name}
-                          className="w-full h-48 object-cover rounded"
-                        />
-                      )}
+                      <img
+                        src={
+                          member.image ||
+                          "/placeholder.png"
+                        }
+                        alt={member.name}
+                        className="w-full h-48 object-cover rounded"
+                      />
 
-                      <h3 className="mt-4 font-semibold">
+                      <h3 className="mt-4 font-semibold text-lg">
                         {member.name}
                       </h3>
 
