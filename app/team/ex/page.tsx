@@ -3,39 +3,32 @@
 import { useEffect, useState } from "react";
 import { roleStructure } from "@/lib/roleStructure";
 
-type Member = {
-  _id: string;
-  name: string;
-  role: string;
-  year: string;
-  status: string;
-  image: string;
-};
-
 export default function ExTeamPage() {
-  const [members, setMembers] = useState<Member[]>([]);
+  const [members, setMembers] = useState<any[]>([]);
   const [years, setYears] = useState<string[]>([]);
-  const [selectedYear, setSelectedYear] = useState<string>("");
+  const [selectedYear, setSelectedYear] = useState("");
 
   useEffect(() => {
     async function fetchMembers() {
       const res = await fetch("/api/members");
-      const data: Member[] = await res.json();
+      const data = await res.json();
 
       const exMembers = data.filter(
-        (m) => m.status === "ex"
+        (m: any) => m.status === "ex"
       );
 
       setMembers(exMembers);
 
-      // ✅ Strictly typed Set<string>
-      const uniqueYears = Array.from(
-        new Set<string>(
-          exMembers.map((m) => String(m.year))
-        )
-      )
-        .sort()
-        .reverse();
+      // 🔥 Proper numeric sorting by first year
+      const uniqueYears = [
+        ...new Set(
+          exMembers.map((m: any) => String(m.year))
+        ),
+      ].sort((a, b) => {
+        const yearA = parseInt(a.split("-")[0]);
+        const yearB = parseInt(b.split("-")[0]);
+        return yearB - yearA; // newest first
+      });
 
       setYears(uniqueYears);
 
@@ -74,10 +67,11 @@ export default function ExTeamPage() {
         </select>
       </div>
 
-      {/* Hierarchical Sections */}
+      {/* Role Based Sections */}
       {roleStructure.map((section) => {
         const sectionMembers = filteredMembers.filter(
-          (m) => section.roles.includes(m.role)
+          (m: any) =>
+            section.roles.includes(m.role)
         );
 
         if (sectionMembers.length === 0)
@@ -96,13 +90,14 @@ export default function ExTeamPage() {
               {section.roles.map((role) =>
                 sectionMembers
                   .filter(
-                    (m) => m.role === role
+                    (m: any) => m.role === role
                   )
-                  .map((member) => (
+                  .map((member: any) => (
                     <div
                       key={member._id}
                       className="bg-gray-900 p-5 rounded-lg"
                     >
+                      {/* ✅ Correct field */}
                       {member.image && (
                         <img
                           src={member.image}
