@@ -3,248 +3,139 @@
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import { usePathname } from "next/navigation"; // ✅ Step 1: Import usePathname
 
 export default function Navbar() {
+  const pathname = usePathname(); // ✅ Step 2: Get current route
+  
   const [menuOpen, setMenuOpen] = useState(false);
   const [teamOpen, setTeamOpen] = useState(false);
   const [eventsOpen, setEventsOpen] = useState(false);
-  const [mobileTeamOpen, setMobileTeamOpen] = useState(false); // ✅ Added
+  const [mobileTeamOpen, setMobileTeamOpen] = useState(false);
   const [mobileEventsOpen, setMobileEventsOpen] = useState(false);
 
   const teamRef = useRef<HTMLDivElement | null>(null);
   const eventsRef = useRef<HTMLDivElement | null>(null);
 
+  // Helper function to check if a link is active
+  const isActive = (path: string) => pathname === path;
+
   // Close desktop dropdowns when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (
-        teamRef.current &&
-        !teamRef.current.contains(event.target as Node)
-      ) {
+      if (teamRef.current && !teamRef.current.contains(event.target as Node)) {
         setTeamOpen(false);
       }
-
-      if (
-        eventsRef.current &&
-        !eventsRef.current.contains(event.target as Node)
-      ) {
+      if (eventsRef.current && !eventsRef.current.contains(event.target as Node)) {
         setEventsOpen(false);
       }
     }
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () =>
-      document.removeEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Lock scroll when mobile menu open
   useEffect(() => {
     document.body.style.overflow = menuOpen ? "hidden" : "auto";
   }, [menuOpen]);
 
-  // Close everything when mobile menu closes
-  useEffect(() => {
-    if (!menuOpen) {
-      setMobileTeamOpen(false);
-      setMobileEventsOpen(false);
-    }
-  }, [menuOpen]);
-
   return (
-    <nav className="bg-[#f4b518] rounded-b-[40px] fixed top-0 left-0 w-full z-[1000]">
+    <nav className="bg-[#f4b518] rounded-b-[30px] md:rounded-b-[40px] fixed top-0 left-0 w-full z-[1000] shadow-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 md:h-24 flex justify-between items-center">
+        
+        {/* LOGOS */}
+        <div className="flex items-center gap-3 sm:gap-6">
+          <Image src="/legacy.png" alt="Legacy" width={120} height={60} className="w-14 sm:w-20 md:w-24 h-auto object-contain" />
+          <div className="h-8 w-[2px] bg-black/20 hidden sm:block"></div>
+          <Image src="/iedc.png" alt="IEDC" width={200} height={60} className="w-32 sm:w-44 md:w-48 lg:w-52 h-auto object-contain" />
+        </div>
 
-      {/* Top Bar */}
-      <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
-
-        {/* Logos */}
-       <div className="flex items-center gap-4">
-  <Image
-    src="/legacy.png"
-    alt="Legacy"
-    width={200}
-    height={100}
-    className="w-20 sm:w-16 md:w-20 lg:w-24 h-auto"
-  />
-
-  <Image
-    src="/iedc.png"
-    alt="IEDC"
-    width={400}
-    height={120}
-    className="w-40  sm:w-50 md:w-40 lg:w-52 h-auto"
-  />
-</div>
-
-
-        {/* Desktop Menu */}
-        <div className="hidden md:flex gap-10 text-xl font-semibold text-black items-center">
-
-          <Link href="/">Home</Link>
+        {/* DESKTOP MENU */}
+        <div className="hidden md:flex items-center gap-6 lg:gap-10 text-black text-[1rem] font-bold">
+          
+          {/* ✅ Step 3: Conditional Styling for HOME */}
+          <Link 
+            href="/" 
+            className={`transition-all duration-300 ${isActive("/") ? "text-white scale-110 border-b-2" : "hover:opacity-60"}`}
+          >
+            Home
+          </Link>
 
           {/* TEAM DROPDOWN */}
           <div ref={teamRef} className="relative">
             <button
               onClick={() => setTeamOpen((prev) => !prev)}
-              className="flex items-center gap-2"
+              className={`flex items-center gap-1 transition-all ${pathname.startsWith("/team") ? "text-white border-b-2" : "hover:opacity-60"}`}
             >
               Team
-              <span className={`transition-transform duration-300 ${teamOpen ? "rotate-180" : ""}`}>
-                ▼
-              </span>
+              <span className={`text-[10px] transition-transform duration-300 ${teamOpen ? "rotate-180" : ""}`}>▼</span>
             </button>
-
-            <div
-              className={`absolute left-0 mt-4 bg-[#f4b518] rounded-xl shadow-xl transition-all duration-300 origin-top ${
-                teamOpen
-                  ? "opacity-100 scale-100 translate-y-0"
-                  : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
-              }`}
-            >
-              <div className="flex flex-col py-4 px-8 gap-4 text-black ">
-                <Link href="/team/current" className="hover:text-gray-600  text-[1.2rem]">
-                  Current
-                </Link>
-                <Link href="/team/ex" className="hover:text-gray-600 text-[1.2rem]">
-                  Previous
-                </Link>
+            <div className={`absolute left-0 mt-4 w-40 bg-[#f4b518] rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 origin-top ${teamOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-2 pointer-events-none"}`}>
+              <div className="flex flex-col py-2">
+                <Link href="/team/current" className={`px-6 py-3 hover:bg-black/5 ${isActive("/team/current") ? "text-white" : ""}`}>Current</Link>
+                <Link href="/team/ex" className={`px-6 py-3 hover:bg-black/5 ${isActive("/team/ex") ? "text-white" : ""}`}>Previous</Link>
               </div>
             </div>
           </div>
 
-          <Link href="/about">About Us</Link>
+          <Link href="/about" className={`transition-all ${isActive("/about") ? "text-white border-b-2" : "hover:opacity-60"}`}>About</Link>
 
           {/* EVENTS DROPDOWN */}
           <div ref={eventsRef} className="relative">
             <button
               onClick={() => setEventsOpen((prev) => !prev)}
-              className="flex items-center gap-2"
+              className={`flex items-center gap-1 transition-all ${pathname.startsWith("/events") ? "text-white border-b-2" : "hover:opacity-60"}`}
             >
               Events
-              <span className={`transition-transform duration-300 ${eventsOpen ? "rotate-180" : ""}`}>
-                ▼
-              </span>
+              <span className={`text-[10px] transition-transform duration-300 ${eventsOpen ? "rotate-180" : ""}`}>▼</span>
             </button>
-
-            <div
-              className={`absolute left-0 mt-4 bg-[#f4b518] rounded-xl shadow-xl transition-all duration-300 origin-top ${
-                eventsOpen
-                  ? "opacity-100 scale-100 translate-y-0"
-                  : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
-              }`}
-            >
-              <div className="flex flex-col py-4 px-8 gap-4 text-black">
-                <Link href="/events/upcoming" className="hover:text-gray-600 text-[1.1rem]">
-                  Upcoming
-                </Link>
-                <Link href="/events/previous" className="hover:text-gray-600 text-[1.1rem]">
-                  Previous
-                </Link>
+            <div className={`absolute left-0 mt-4 w-40 bg-[#f4b518] rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 origin-top ${eventsOpen ? "opacity-100 scale-100 translate-y-0" : "opacity-0 scale-95 -translate-y-2 pointer-events-none"}`}>
+              <div className="flex flex-col py-2">
+                <Link href="/events/upcoming" className={`px-6 py-3 hover:bg-black/5 ${isActive("/events/upcoming") ? "text-white" : ""}`}>Upcoming</Link>
+                <Link href="/events/previous" className={`px-6 py-3 hover:bg-black/5 ${isActive("/events/previous") ? "text-white" : ""}`}>Previous</Link>
               </div>
             </div>
           </div>
 
-          <Link href="/join">Join Community</Link>
-          <Link href="/opinion">Opinion</Link>
+          <Link href="/join" className={`bg-black text-[#f4b518] px-5 py-2 rounded-full hover:scale-105 transition-transform text-sm ${isActive("/join") ? "ring-2 ring-white" : ""}`}>Join</Link>
         </div>
 
-        {/* Mobile Hamburger */}
-        <button
-          onClick={() => setMenuOpen((prev) => !prev)}
-          className="md:hidden flex flex-col justify-between w-8 h-6"
-        >
-          <span
-            className={`block h-[3px] bg-black rounded-full transition-all duration-300 ${
-              menuOpen ? "rotate-45 translate-y-2.5" : ""
-            }`}
-          />
-          <span
-            className={`block h-[3px] bg-black rounded-full transition-all duration-300 ${
-              menuOpen ? "opacity-0" : ""
-            }`}
-          />
-          <span
-            className={`block h-[0.2rem] bg-black rounded-full transition-all duration-300 ${
-              menuOpen ? "-rotate-45 -translate-y-2.5 " : "w-5"
-            }`}
-          />
+        {/* MOBILE HAMBURGER */}
+        <button onClick={() => setMenuOpen((prev) => !prev)} className="md:hidden relative w-10 h-10 flex flex-col justify-center items-center gap-1.5 z-[1100]">
+          <span className={`block w-7 h-0.5 bg-black rounded-full transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
+          <span className={`block w-7 h-0.5 bg-black rounded-full transition-all duration-300 ${menuOpen ? "opacity-0" : ""}`} />
+          <span className={`block w-7 h-0.5 bg-black rounded-full transition-all duration-300 ${menuOpen ? "-rotate-45 -translate-y-2" : ""}`} />
         </button>
       </div>
 
-      {/* MOBILE MENU */}
-      <div
-        className={`md:hidden fixed top-[80px] left-0 w-full h-[calc(100vh-80px)] bg-[#f4b518]/95 backdrop-blur-2xl flex flex-col gap-6 px-6 py-8 z-[999] text-black text-lg font-semibold transition-all duration-300 ${
-          menuOpen
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 -translate-y-5 pointer-events-none"
-        }`}
-      >
-        <Link href="/" onClick={() => setMenuOpen(false)}>Home</Link>
-
-        {/* Mobile Team */}
-        <div>
-          <button
-            onClick={() => setMobileTeamOpen((prev) => !prev)}
-            className="flex items-center gap-1 w-full"
-          >
-            Team
-            <span className={`transition-transform duration-300 ${mobileTeamOpen ? "rotate-180 " : ""}`}>
-              ▼
-            </span>
-          </button>
-
-          <div
-            className={`overflow-hidden transition-all duration-300 ${
-              mobileTeamOpen ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
-            }`}
-          >
-            <div className="ml-4 flex flex-col gap-3">
-              <Link href="/team/current" onClick={() => setMenuOpen(false)}>
-                Current
-              </Link>
-              <Link href="/team/ex" onClick={() => setMenuOpen(false)}>
-                Ex-Team
-              </Link>
+      {/* MOBILE OVERLAY MENU */}
+      <div className={`md:hidden fixed inset-0 bg-[#f4b518] z-[1050] transition-all duration-500 ease-in-out px-8 pt-32 ${menuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none"}`}>
+        <div className="flex flex-col gap-8 text-xl font-semibold text-black">
+          <Link href="/" onClick={() => setMenuOpen(false)} className={isActive("/") ? "text-white" : ""}>Home</Link>
+          
+          <div>
+            <button onClick={() => setMobileTeamOpen(!mobileTeamOpen)} className={`flex items-center justify-between w-full ${pathname.startsWith("/team") ? "text-white" : ""}`}>
+              Team <span>▼</span>
+            </button>
+            <div className={`overflow-hidden transition-all duration-300 flex flex-col gap-4 ml-4 font-medium text-lg ${mobileTeamOpen ? "max-h-40 mt-4" : "max-h-0"}`}>
+              <Link href="/team/current" onClick={() => setMenuOpen(false)} className={isActive("/team/current") ? "text-white" : ""}>Current Team</Link>
+              <Link href="/team/ex" onClick={() => setMenuOpen(false)} className={isActive("/team/ex") ? "text-white" : ""}>Previous Team</Link>
             </div>
           </div>
-        </div>
 
-        <Link href="/about" onClick={() => setMenuOpen(false)}>About Us</Link>
+          <Link href="/about" onClick={() => setMenuOpen(false)} className={isActive("/about") ? "text-white" : ""}>About Us</Link>
 
-        {/* Mobile Events */}
-        <div>
-          <button
-            onClick={() => setMobileEventsOpen((prev) => !prev)}
-            className="flex items-center gap-1 w-full"
-          >
-            Events
-            <span className={`transition-transform duration-300 ${mobileEventsOpen ? "rotate-180" : ""}`} >
-              ▼
-            </span>
-          </button>
-
-          <div
-            className={`overflow-hidden transition-all duration-300 ${
-              mobileEventsOpen ? "max-h-40 opacity-100 mt-3" : "max-h-0 opacity-0"
-            }`}
-          >
-            <div className="ml-4 flex flex-col gap-3">
-              <Link href="/events/upcoming" onClick={() => setMenuOpen(false)}>
-                Upcoming
-              </Link>
-              <Link href="/events/previous" onClick={() => setMenuOpen(false)}>
-                Previous
-              </Link>
+          <div>
+            <button onClick={() => setMobileEventsOpen(!mobileEventsOpen)} className={`flex items-center justify-between w-full ${pathname.startsWith("/events") ? "text-white" : ""}`}>
+              Events <span>▼</span>
+            </button>
+            <div className={`overflow-hidden transition-all duration-300 flex flex-col gap-4 ml-4 font-medium text-lg ${mobileEventsOpen ? "max-h-40 mt-4" : "max-h-0"}`}>
+              <Link href="/events/upcoming" onClick={() => setMenuOpen(false)} className={isActive("/events/upcoming") ? "text-white" : ""}>Upcoming Events</Link>
+              <Link href="/events/previous" onClick={() => setMenuOpen(false)} className={isActive("/events/previous") ? "text-white" : ""}>Previous Events</Link>
             </div>
           </div>
+
+          <Link href="/join" onClick={() => setMenuOpen(false)} className={isActive("/join") ? "text-white" : ""}>Join Community</Link>
         </div>
-
-        <Link href="/join" onClick={() => setMenuOpen(false)}>
-          Join Community
-        </Link>
-
-        <Link href="/opinion" onClick={() => setMenuOpen(false)}>
-          Opinion
-        </Link>
       </div>
     </nav>
   );
