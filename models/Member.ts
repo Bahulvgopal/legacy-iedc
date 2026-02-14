@@ -3,32 +3,11 @@ import mongoose from "mongoose";
 const MemberSchema = new mongoose.Schema(
   {
     name: { type: String, required: true },
-    image: { type: String, required: true },
-
+    image: { type: String, required: true }, // 🔥 must be image
     role: { type: String, required: true },
-
     year: { type: String, required: true },
-
-    status: {
-      type: String,
-      enum: ["current", "ex"],
-      default: "current",
-    },
-
-    priority: {
-      type: Number,
-      default: 0, // for drag ordering
-    },
-
-    isMentor: {
-      type: Boolean,
-      default: false,
-    },
-
+    status: { type: String, default: "current" },
     bio: { type: String },
-
-    linkedin: { type: String },
-    github: { type: String },
   },
   { timestamps: true }
 );

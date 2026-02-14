@@ -15,6 +15,8 @@ export default function AddMemberPage() {
     bio: "",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const roles = [
     "Nodal Officer",
     "Project Coordinator",
@@ -49,20 +51,33 @@ export default function AddMemberPage() {
       return;
     }
 
-    const res = await fetch("/api/members", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(form),
-    });
+    try {
+      setLoading(true);
 
-    if (res.ok) {
+      const res = await fetch("/api/members", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to add member");
+        setLoading(false);
+        return;
+      }
+
       alert("Member added successfully");
       router.push("/admin");
       router.refresh();
-    } else {
-      alert("Failed to add member");
+    } catch (error) {
+      alert("Something went wrong");
+      console.error(error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -75,12 +90,12 @@ export default function AddMemberPage() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
-          {/* Name */}
           <input
             type="text"
             placeholder="Member Name"
             required
             className="p-3 rounded bg-gray-800"
+            value={form.name}
             onChange={(e) =>
               setForm({ ...form, name: e.target.value })
             }
@@ -95,7 +110,7 @@ export default function AddMemberPage() {
             />
           )}
 
-          {/* 🔥 Base64 Image Upload */}
+          {/* Base64 Image Upload */}
           <input
             type="file"
             accept="image/*"
@@ -108,19 +123,19 @@ export default function AddMemberPage() {
               const reader = new FileReader();
 
               reader.onloadend = () => {
-                setForm({
-                  ...form,
-                  image: reader.result as string, // ✅ Base64
-                });
+                setForm((prev) => ({
+                  ...prev,
+                  image: reader.result as string,
+                }));
               };
 
               reader.readAsDataURL(file);
             }}
           />
 
-          {/* Role */}
           <select
             required
+            value={form.role}
             className="p-3 rounded bg-gray-800"
             onChange={(e) =>
               setForm({ ...form, role: e.target.value })
@@ -134,19 +149,19 @@ export default function AddMemberPage() {
             ))}
           </select>
 
-          {/* Year */}
           <input
             type="text"
             placeholder="Year (e.g. 2024-2025)"
             required
+            value={form.year}
             className="p-3 rounded bg-gray-800"
             onChange={(e) =>
               setForm({ ...form, year: e.target.value })
             }
           />
 
-          {/* Status */}
           <select
+            value={form.status}
             className="p-3 rounded bg-gray-800"
             onChange={(e) =>
               setForm({ ...form, status: e.target.value })
@@ -156,9 +171,9 @@ export default function AddMemberPage() {
             <option value="ex">Ex Team</option>
           </select>
 
-          {/* Bio */}
           <textarea
             placeholder="Short Bio"
+            value={form.bio}
             className="p-3 rounded bg-gray-800"
             onChange={(e) =>
               setForm({ ...form, bio: e.target.value })
@@ -167,9 +182,10 @@ export default function AddMemberPage() {
 
           <button
             type="submit"
+            disabled={loading}
             className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold py-3 rounded"
           >
-            Add Member
+            {loading ? "Adding..." : "Add Member"}
           </button>
         </form>
       </div>
