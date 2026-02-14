@@ -2,6 +2,8 @@ import { connectDB } from "@/lib/mongodb";
 import Member from "@/models/Member";
 import { roleStructure } from "@/lib/roleStructure";
 
+export const dynamic = "force-dynamic";
+
 export default async function CurrentTeamPage() {
   await connectDB();
 

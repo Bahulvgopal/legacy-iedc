@@ -12,6 +12,7 @@ interface Member {
   status: string;
   bio?: string;
 }
+export const dynamic = "force-dynamic";
 
 export default function ExTeamPage() {
   const [members, setMembers] = useState<Member[]>([]);
