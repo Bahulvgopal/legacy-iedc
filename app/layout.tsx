@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Preloader from "@/components/Preloader";
 import Navbar from "../components/Navbar";
+import Footer from "@/components/Footer"; // ✅ ADD THIS
 
 export const metadata: Metadata = {
   title: {
@@ -36,15 +37,18 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-     <body className="bg-black text-white">
-  <Preloader />
-  <Navbar />
-  <div className="pt-24">
-    {children}
-  </div>
-</body>
+      <body className="bg-black text-white flex flex-col min-h-screen">
+        <Preloader />
+        <Navbar />
 
+        {/* Page Content */}
+        <div className="pt-24 flex-grow">
+          {children}
+        </div>
 
+        {/* ✅ Footer Added Here */}
+        <Footer />
+      </body>
     </html>
   );
 }
