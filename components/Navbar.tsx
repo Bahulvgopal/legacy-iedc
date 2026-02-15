@@ -39,7 +39,7 @@ export default function Navbar() {
   }, [menuOpen]);
 
   return (
-    <nav className="bg-[#f4b518] rounded-b-[30px] md:rounded-b-[40px] fixed top-0 left-0 w-full z-[1000] shadow-md">
+    <nav className="bg-[#f4b518]  fixed top-0 left-0 w-full z-[1000] shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 md:h-24 flex justify-between items-center">
         
         {/* LOGOS */}
