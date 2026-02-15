@@ -57,7 +57,7 @@ export default function Page() {
               transition={{ duration: 0.8, ease: "easeOut" }}
               className="space-y-8 md:space-y-10 text-black z-10 order-1 lg:order-1"
             >
-              <div className="space-y-4 md:space-y-6">
+              <div className="space-y-4 md:mt-5 -mt-4 md:space-y-6">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
