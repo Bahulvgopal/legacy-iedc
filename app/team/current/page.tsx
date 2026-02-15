@@ -42,11 +42,11 @@ export default async function CurrentTeamPage() {
           }
         }
       `}} />
-      <main className="min-h-screen bg-black">
+      <main className="min-h-screen -mt-4 bg-black overflow-x-hidden">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-[#f4b518]/5 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-[#f4b518]/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '700ms' }}></div>
+        <div className="absolute top-1/4 left-1/4 w-60 sm:w-72 h-60 sm:h-72 bg-[#f4b518]/5 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-60 sm:w-72 h-60 sm:h-72 bg-[#f4b518]/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '700ms' }}></div>
       </div>
 
       {/* Content Container */}
@@ -180,7 +180,7 @@ export default async function CurrentTeamPage() {
                 animation: `fadeInUp 0.8s ease-out ${roleStructure.length * 0.2}s both`
               }}
             >
-              <div className="relative bg-gradient-to-br from-zinc-900 to-black border-2 border-[#f4b518] rounded-2xl p-6 sm:p-8 md:p-10 max-w-3xl mx-auto shadow-[0_0_40px_rgba(244,181,24,0.2)]">
+              <div className="relative bg-gradient-to-br from-zinc-900 to-black border-2 border-[#f4b518] rounded-2xl p-6 sm:p-8 md:p-10 w-full max-w-3xl mx-auto shadow-[0_0_40px_rgba(244,181,24,0.2)]">
                 <div className="absolute inset-0 bg-[#f4b518]/5 rounded-2xl blur-2xl -z-10" />
                 
                 <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-3 sm:mb-4 uppercase tracking-tight">

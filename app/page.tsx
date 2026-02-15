@@ -126,7 +126,7 @@ export default function Page() {
                 </Link>
                 
                 <Link 
-                  href="/events" 
+                  href="/events/previous" 
                   className="group relative border-[3px] border-black text-black px-8 md:px-12 lg:px-14 py-3.5 md:py-4 lg:py-5 rounded-full font-bold text-sm md:text-base lg:text-lg overflow-hidden transition-all hover:scale-105"
                 >
                   <span className="relative z-10 group-hover:text-[#e6e5e2] transition-colors">Explore Events</span>
@@ -399,34 +399,41 @@ export default function Page() {
         </section>
 
         {/* Call to Action Footer Section */}
-        <section className="py-20 md:py-24 px-6 md:px-12 lg:px-24 bg-gradient-to-br from-[#f4b518] to-[#e5a614] relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-0 right-0 w-96 h-96 bg-black rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-black rounded-full blur-3xl" />
-          </div>
+<section className="py-20 md:py-24 px-6 md:px-12 lg:px-24 bg-gradient-to-br from-[#f4b518] to-[#e5a614] relative overflow-hidden">
+  <div className="absolute inset-0 opacity-10">
+    <div className="absolute top-0 right-0 w-96 h-96 bg-black rounded-full blur-3xl" />
+    <div className="absolute bottom-0 left-0 w-96 h-96 bg-black rounded-full blur-3xl" />
+  </div>
 
-          <Reveal>
-            <div className="max-w-4xl mx-auto text-center space-y-6 md:space-y-8 relative z-10">
-              <h2 className="text-3xl md:text-5xl lg:text-6xl font-black uppercase text-black tracking-tighter leading-tight">
-                Ready to Start Your Journey?
-              </h2>
-              <p className="text-base md:text-lg lg:text-xl text-black/80 font-semibold max-w-2xl mx-auto">
-                Join a community of innovators, creators, and entrepreneurs who are shaping the future.
-              </p>
-              <motion.div
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Link 
-                  href="/join"
-                  className="inline-block bg-black text-[#f4b518] px-10 md:px-12 py-4 md:py-5 rounded-full font-bold text-base md:text-lg shadow-2xl shadow-black/30 hover:shadow-black/50 transition-all"
-                >
-                  Become a Member Today
-                </Link>
-              </motion.div>
-            </div>
-          </Reveal>
-        </section>
+  <Reveal>
+    <div className="max-w-4xl mx-auto text-center space-y-6 md:space-y-8 relative z-10">
+      <h2 className="text-3xl md:text-5xl lg:text-6xl font-black uppercase text-black tracking-tighter leading-tight">
+        Have a Groundbreaking <br /> Startup Idea?
+      </h2>
+      
+      <p className="text-base md:text-lg lg:text-xl text-black/80 font-semibold max-w-2xl mx-auto">
+        Don't let your vision stay on paper. Submit your idea today to receive expert mentorship, 
+        strategic guidance, and a clear path to market.
+      </p>
+
+      <motion.div
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+      >
+        <Link 
+          href="/submit-idea" // Make sure to update this route
+          className="inline-block bg-black text-[#f4b518] px-10 md:px-12 py-4 md:py-5 rounded-full font-bold text-base md:text-lg shadow-2xl shadow-black/30 hover:shadow-black/50 transition-all uppercase tracking-tight"
+        >
+          Pitch Your Idea Now
+        </Link>
+      </motion.div>
+      
+      <p className="text-xs md:text-sm text-black/60 font-medium uppercase tracking-widest">
+        Direct Mentorship • Strategic Roadmap • Network Access
+      </p>
+    </div>
+  </Reveal>
+</section>
       </div>
     </div>
   );

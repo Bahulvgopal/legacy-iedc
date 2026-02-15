@@ -169,18 +169,11 @@ export default function Footer() {
         {/* Bottom Bar */}
         <div className="border-t border-black/20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex flex-col md:flex-row justify-center items-center gap-4">
               <p className="text-black/70 text-sm md:text-base text-center md:text-left font-semibold">
                 © 2026 Legacy IEDC UCEK. All Rights Reserved
               </p>
-              <div className="flex items-center gap-6">
-                <Link href="/privacy" className="text-black/70 hover:text-black text-sm font-semibold transition-colors">
-                  Privacy Policy
-                </Link>
-                <Link href="/terms" className="text-black/70 hover:text-black text-sm font-semibold transition-colors">
-                  Terms of Service
-                </Link>
-              </div>
+              
             </div>
           </div>
         </div>
