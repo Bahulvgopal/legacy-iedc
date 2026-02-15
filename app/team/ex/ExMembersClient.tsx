@@ -34,7 +34,7 @@ export default function ExMembersClient({ members }: { members: Member[] }) {
       : members.filter((m) => m.year === selectedYear);
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen -mt-4 bg-black">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-[#f4b518]/5 rounded-full blur-3xl animate-pulse"></div>
