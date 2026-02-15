@@ -37,7 +37,8 @@ export default async function AdminDashboard({
   /* ================= EVENTS ================= */
   const eventYearFilter = params.eventYear || "";
 
-  const allEvents = await Event.find().sort({ eventDate: -1 });
+  // Use .lean() to get plain JavaScript objects
+  const allEvents = await Event.find().sort({ eventDate: -1 }).lean();
 
   const eventYears = [
     ...new Set(
@@ -61,22 +62,30 @@ export default async function AdminDashboard({
       )
     : allEvents;
 
+  // Serialize event data with registration counts
   const eventData = await Promise.all(
     filteredEvents.map(async (event: any) => {
       const count = await Registration.countDocuments({
         eventId: event._id,
       });
       return {
-        ...event.toObject(),
+        _id: event._id.toString(),
+        title: event.title || '',
+        description: event.description || '',
+        location: event.location || '',
+        eventDate: event.eventDate ? new Date(event.eventDate).toISOString() : null,
+        registrationDeadline: event.registrationDeadline ? new Date(event.registrationDeadline).toISOString() : null,
+        image: event.image || '',
         registrationCount: count,
       };
     })
   );
 
   /* ================= MEMBERS ================= */
+  // Use .lean() to get plain JavaScript objects
   const allMembers = await Member.find().sort({
     createdAt: -1,
-  });
+  }).lean();
 
   const uniqueYears = [
     ...new Set(allMembers.map((m: any) => m.year)),
@@ -100,6 +109,19 @@ export default async function AdminDashboard({
           return yearMatch && statusMatch;
         })
       : allMembers;
+
+  // Serialize member data
+  const serializedMembers = filteredMembers.map((member: any) => ({
+    _id: member._id.toString(),
+    name: member.name || '',
+    image: member.image || '',
+    role: member.role || '',
+    year: member.year || '',
+    status: member.status || 'current',
+    priority: member.priority || 0,
+    isMentor: member.isMentor || false,
+    bio: member.bio || '',
+  }));
 
   return (
     <>
@@ -328,7 +350,7 @@ export default async function AdminDashboard({
                           Edit
                         </a>
                         <div className="col-span-2">
-                          <DeleteEventButton id={event._id.toString()} />
+                          <DeleteEventButton id={event._id} />
                         </div>
                       </div>
                     </div>
@@ -461,14 +483,14 @@ export default async function AdminDashboard({
               <div className="flex items-center gap-2 mt-4 pt-4 border-t-2 border-black/5">
                 <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-purple-600 rounded-full" />
                 <p className="text-xs sm:text-sm font-bold text-black/70">
-                  Showing <span className="text-black text-sm sm:text-base">{filteredMembers.length}</span> {filteredMembers.length === 1 ? 'member' : 'members'}
+                  Showing <span className="text-black text-sm sm:text-base">{serializedMembers.length}</span> {serializedMembers.length === 1 ? 'member' : 'members'}
                 </p>
               </div>
             </form>
 
             {/* Members Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5 md:gap-6">
-              {filteredMembers.map((member: any) => (
+              {serializedMembers.map((member: any) => (
                 <div
                   key={member._id}
                   className="group relative bg-white/90 backdrop-blur-sm border-2 border-black/5 hover:border-purple-500 rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-6 transition-all duration-300 hover:shadow-2xl hover:-translate-y-1"
@@ -508,7 +530,7 @@ export default async function AdminDashboard({
                     >
                       Edit
                     </a>
-                    <DeleteMemberButton id={member._id.toString()} />
+                    <DeleteMemberButton id={member._id} />
                   </div>
                 </div>
               ))}

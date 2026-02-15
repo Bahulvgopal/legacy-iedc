@@ -64,3 +64,49 @@ body {
 .animate-scan {
   animation: scan 2s linear infinite;
 }
+
+/* ============================================
+   ADD THIS TO YOUR GLOBAL CSS FILE
+   (app/globals.css or styles/globals.css)
+   ============================================ */
+
+/* FadeInUp Animation for Team Pages */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Gradient Animation for Text */
+@keyframes gradient {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient 3s ease infinite;
+}
+
+/* ============================================
+   INSTRUCTIONS:
+   ============================================
+   
+   1. Open your global CSS file (usually at app/globals.css)
+   
+   2. Add the above CSS code anywhere in the file
+   
+   3. Save the file
+   
+   4. The animations will now work across all pages
+   
+   ============================================ */

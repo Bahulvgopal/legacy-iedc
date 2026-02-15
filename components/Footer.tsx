@@ -24,6 +24,7 @@ export default function Footer() {
                   width={80} 
                   height={40} 
                   className="h-auto w-16 md:w-20 object-contain"
+                  style={{ width: 'auto', height: 'auto' }}
                 />
                 <div className="h-10 w-[2px] bg-black/30" />
                 <Image 
@@ -32,6 +33,7 @@ export default function Footer() {
                   width={120} 
                   height={40} 
                   className="h-auto w-28 md:w-36 object-contain"
+                  style={{ width: 'auto', height: 'auto' }}
                 />
               </div>
               <p className="text-black/70 text-sm md:text-base leading-relaxed font-semibold">
@@ -172,7 +174,12 @@ export default function Footer() {
                 © 2026 Legacy IEDC UCEK. All Rights Reserved
               </p>
               <div className="flex items-center gap-6">
-              
+                <Link href="/privacy" className="text-black/70 hover:text-black text-sm font-semibold transition-colors">
+                  Privacy Policy
+                </Link>
+                <Link href="/terms" className="text-black/70 hover:text-black text-sm font-semibold transition-colors">
+                  Terms of Service
+                </Link>
               </div>
             </div>
           </div>

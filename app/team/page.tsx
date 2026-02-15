@@ -2,12 +2,14 @@ import { connectDB } from "@/lib/mongodb";
 import Member from "@/models/Member";
 import Image from "next/image";
 
+export const dynamic = "force-dynamic"; // 🚀 disable cache
+
 export default async function TeamPage() {
   await connectDB();
 
-  const members = await Member.find({ status: "current" }).sort({
-    priority: 1,
-  });
+  const members = await Member.find({ status: "current" })
+    .sort({ priority: 1 })
+    .lean();
 
   // Role hierarchy order
   const roleOrder = [
@@ -34,41 +36,36 @@ export default async function TeamPage() {
     "Creative And Innovation Officer",
   ];
 
-  // Separate mentors
   const mentors = members.filter((m: any) => m.isMentor);
   const coreTeam = members.filter((m: any) => !m.isMentor);
 
-  // Group by role
-  const grouped: any = {};
+  const grouped: Record<string, any[]> = {};
 
   roleOrder.forEach((role) => {
-    const roleMembers = coreTeam.filter(
-      (m: any) => m.role === role
-    );
-
+    const roleMembers = coreTeam.filter((m: any) => m.role === role);
     if (roleMembers.length > 0) {
       grouped[role] = roleMembers;
     }
   });
 
   return (
-    <div className="pt-28 p-10 bg-black text-white min-h-screen">
-      <h1 className="text-4xl font-bold mb-12 text-center">
+    <div className="pt-28 px-6 md:px-10 bg-black text-white min-h-screen">
+      <h1 className="text-4xl md:text-5xl font-bold mb-16 text-center">
         Our Team
       </h1>
 
       {/* 🔹 Mentors Section */}
       {mentors.length > 0 && (
-        <div className="mb-16">
-          <h2 className="text-3xl font-bold mb-6 text-yellow-400">
+        <section className="mb-20">
+          <h2 className="text-3xl font-bold mb-8 text-yellow-400">
             Mentors
           </h2>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {mentors.map((member: any) => (
               <div
-                key={member._id}
-                className="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 transition"
+                key={member._id.toString()}
+                className="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 transition duration-300"
               >
                 <Image
                   src={member.image}
@@ -89,20 +86,20 @@ export default async function TeamPage() {
               </div>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {/* 🔹 Core Team Section */}
       {Object.keys(grouped).map((role) => (
-        <div key={role} className="mb-14">
-          <h2 className="text-2xl font-bold mb-6 text-yellow-500">
+        <section key={role} className="mb-16">
+          <h2 className="text-2xl font-bold mb-8 text-yellow-500">
             {role}
           </h2>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {grouped[role].map((member: any) => (
               <div
-                key={member._id}
+                key={member._id.toString()}
                 className="bg-gray-900 p-6 rounded-xl shadow-lg hover:scale-105 transition duration-300"
               >
                 <Image
@@ -121,7 +118,7 @@ export default async function TeamPage() {
               </div>
             ))}
           </div>
-        </div>
+        </section>
       ))}
     </div>
   );
