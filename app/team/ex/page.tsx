@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/mongodb";
 import Member from "@/models/Member";
 import ExMembersClient from "./ExMembersClient";
+export const dynamic = "force-dynamic";
 
 export default async function ExMembersPage() {
   await connectDB();

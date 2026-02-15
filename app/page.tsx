@@ -346,36 +346,53 @@ export default function Page() {
             ) : (
               <>
                 <div className="relative flex justify-center items-center h-[550px] md:h-[650px] lg:h-[680px]">
-                  <AnimatePresence mode="popLayout">
-                    {[
-                      (index - 1 + events.length) % events.length,
-                      index,
-                      (index + 1) % events.length
-                    ].map((itemIdx, i) => {
-                      const event = events[itemIdx];
-                      const isCenter = i === 1;
+  <AnimatePresence mode="popLayout">
+    {events.length > 0 && [
+      (index - 1 + events.length) % events.length,
+      index,
+      (index + 1) % events.length,
+    ].map((i, position) => {
+      const event = events[i];
+      if (!event) return null;
 
-                      return (
-                        <motion.div
-                          key={event._id || event.id || itemIdx}
-                          initial={{ opacity: 0, scale: 0.8, x: i === 0 ? -100 : i === 2 ? 100 : 0 }}
-                          animate={{
-                            opacity: isCenter ? 1 : 0.25,
-                            scale: isCenter ? 1 : 0.75,
-                            x: i === 0 ? "-115%" : i === 2 ? "115%" : "0%",
-                            zIndex: isCenter ? 20 : 10,
-                            filter: isCenter ? "blur(0px)" : "blur(6px)"
-                          }}
-                          exit={{ opacity: 0, scale: 0.5 }}
-                          transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
-                          className={`absolute w-full max-w-[300px] md:max-w-[380px] lg:max-w-[420px] ${!isCenter ? "hidden md:block" : "block"}`}
-                        >
-                          <EventCard event={event} highlighted={isCenter} />
-                        </motion.div>
-                      );
-                    })}
-                  </AnimatePresence>
-                </div>
+      const isCenter = position === 1; // Middle card in the array
+      const isLeft = position === 0;
+      const isRight = position === 2;
+
+      return (
+        <motion.div
+          key={`${event._id}-${i}`} // Better key to force re-render
+          initial={{ 
+            opacity: 0, 
+            scale: 0.8, 
+            x: isLeft ? -200 : isRight ? 200 : 0 
+          }}
+          animate={{
+            opacity: isCenter ? 1 : 0.3,
+            scale: isCenter ? 1 : 0.75,
+            x: isLeft ? "-115%" : isRight ? "115%" : "0%",
+            zIndex: isCenter ? 20 : 10,
+            filter: isCenter ? "blur(0px)" : "blur(6px)"
+          }}
+          exit={{ 
+            opacity: 0, 
+            scale: 0.5,
+            transition: { duration: 0.3 }
+          }}
+          transition={{ 
+            duration: 0.7, 
+            ease: [0.25, 0.46, 0.45, 0.94] 
+          }}
+          className={`absolute w-full max-w-[300px] md:max-w-[380px] lg:max-w-[420px] ${
+            !isCenter ? "hidden md:block pointer-events-none" : "block"
+          }`}
+        >
+          <EventCard event={event} highlighted={isCenter} />
+        </motion.div>
+      );
+    })}
+  </AnimatePresence>
+</div>
 
                 {/* Pagination Dots */}
                 <div className="flex justify-center gap-3 mt-12 md:mt-16">
