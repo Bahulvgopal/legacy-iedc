@@ -338,7 +338,7 @@ export default function MemberProfile({ member }: { member: any }) {
           {/* Header stripe */}
           <div className="mp-stripe">
             <div className="mp-stripe-glow" />
-            <div className="mp-stripe-tag">Member Profile</div>
+            
           </div>
 
           {/* Avatar floats below stripe */}
