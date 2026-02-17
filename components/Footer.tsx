@@ -149,9 +149,9 @@ export default function Footer() {
                   </svg>
                 </a>
 
-                {/* Twitter/X */}
+                {/* Utube/X */}
                 <a
-                  href="https://youtube.com/@legacy_iedc"
+                  href="https://www.youtube.com/@iedcuce"
   target="_blank"
   rel="noopener noreferrer"
   className="group w-12 h-12 rounded-xl bg-black/10 hover:bg-black border border-black/20 hover:border-black flex items-center justify-center transition-all duration-300 hover:scale-110"
