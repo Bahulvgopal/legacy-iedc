@@ -327,7 +327,7 @@ export default function MemberProfile({ member }: { member: any }) {
         }
       `}</style>
 
-      <div className="mp-page">
+      <div className="mp-page -mt-4">
         <div className="mp-blob1" />
         <div className="mp-blob2" />
 
