@@ -162,7 +162,7 @@ export default function JoinPage() {
                   </p>
 
                   <a
-                    href="https://docs.google.com/forms/d/e/1FAIpQLSeQaErcgueu4uQ3qab6zyf9MmsxM7b5CKW86x0oGrJjqiJyEQ/closedform"
+                    href="https://docs.google.com/forms/d/e/1FAIpQLSc-BQ1SUNHhZlcaRX6lGMwjUj_DPGVyAN_ZlBbAsHTEs5HJ7Q/viewform?usp=sf_link"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="group inline-flex items-center gap-3 bg-gradient-to-r from-[#f4b518] to-[#ffd700] px-8 sm:px-10 md:px-12 py-3.5 sm:py-4 rounded-full font-bold text-base sm:text-lg text-black uppercase tracking-wide transition-all duration-300 hover:scale-105 shadow-[0_0_40px_rgba(244,181,24,0.4)] hover:shadow-[0_0_60px_rgba(244,181,24,0.6)]"
@@ -177,45 +177,7 @@ export default function JoinPage() {
             </section>
 
             {/* Follow Us Section */}
-            <section style={{ animation: 'fadeInUp 0.8s ease-out 0.4s both' }}>
-              <div className="text-center mb-8 sm:mb-10">
-                <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-3 sm:mb-4 uppercase tracking-tight">
-                  Follow <span className="text-[#f4b518]">Us</span>
-                </h2>
-                <p className="text-sm sm:text-base text-gray-400 max-w-xl mx-auto px-2">
-                  Stay connected and get the latest updates on events, workshops, and opportunities
-                </p>
-              </div>
-
-              {/* Social Media Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5 md:gap-6">
-                {socialLinks.map((social, index) => (
-                  <a
-                    key={social.name}
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group relative bg-gradient-to-br from-zinc-950 to-black border-2 border-zinc-800 hover:border-[#f4b518] rounded-2xl p-6 sm:p-7 text-center transition-all duration-500 hover:shadow-[0_0_40px_rgba(244,181,24,0.3)] hover:-translate-y-2"
-                    style={{ animation: `scaleIn 0.6s ease-out ${0.5 + index * 0.1}s both` }}
-                  >
-                    <div className="absolute inset-0 bg-[#f4b518]/5 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10"></div>
-                    
-                    {/* Icon Container */}
-                    <div className="mb-3 sm:mb-4 text-gray-400 group-hover:text-[#f4b518] transition-colors duration-300 flex justify-center">
-                      {social.icon}
-                    </div>
-                    
-                    {/* Name */}
-                    <p className="text-xs sm:text-sm font-bold text-white group-hover:text-[#f4b518] transition-colors duration-300 uppercase tracking-wider">
-                      {social.name}
-                    </p>
-
-                    {/* Hover Effect Line */}
-                    <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-[#f4b518] to-transparent transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 rounded-b-2xl"></div>
-                  </a>
-                ))}
-              </div>
-            </section>
+            
 
             {/* Bottom Message */}
             <div className="mt-12 sm:mt-16 text-center" style={{ animation: 'fadeInUp 0.8s ease-out 0.6s both' }}>
@@ -225,7 +187,7 @@ export default function JoinPage() {
                 <p className="text-sm sm:text-base md:text-lg text-gray-300 font-medium leading-relaxed">
                   Questions? Reach out to us at{" "}
                   <a href="mailto:contact@legacyiedc.com" className="text-[#f4b518] font-bold hover:underline">
-                    contact@legacyiedc.com
+                    iedc.uck@gmail.com
                   </a>
                 </p>
               </div>

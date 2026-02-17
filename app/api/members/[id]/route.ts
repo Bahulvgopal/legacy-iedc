@@ -5,22 +5,31 @@ import mongoose from "mongoose";
 import fs from "fs/promises";
 import path from "path";
 
-export async function GET(
-  req: Request,
-  context: { params: Promise<{ id: string }> }
-) {
+type Context = {
+  params: Promise<{ id: string }>;
+};
+
+/* ================= GET ================= */
+export async function GET(req: Request, context: Context) {
   try {
     await connectDB();
+
     const { id } = await context.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ message: "Invalid ID" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Invalid ID" },
+        { status: 400 }
+      );
     }
 
     const member = await Member.findById(id);
 
     if (!member) {
-      return NextResponse.json({ message: "Not found" }, { status: 404 });
+      return NextResponse.json(
+        { message: "Not found" },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json(member);
@@ -32,26 +41,31 @@ export async function GET(
   }
 }
 
-export async function PUT(
-  req: Request,
-  context: { params: Promise<{ id: string }> }
-) {
+/* ================= PUT ================= */
+export async function PUT(req: Request, context: Context) {
   try {
     await connectDB();
-    const { id } = await context.params;
+
+    const { id } = await context.params; // ✅ FIX
     const body = await req.json();
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ message: "Invalid ID" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Invalid ID" },
+        { status: 400 }
+      );
     }
 
     const oldMember = await Member.findById(id);
 
     if (!oldMember) {
-      return NextResponse.json({ message: "Not found" }, { status: 404 });
+      return NextResponse.json(
+        { message: "Not found" },
+        { status: 404 }
+      );
     }
 
-    // 🔥 delete old image if changed
+    // delete old image if changed
     if (
       oldMember.image &&
       body.image &&
@@ -69,7 +83,7 @@ export async function PUT(
     const updated = await Member.findByIdAndUpdate(
       id,
       body,
-      { returnDocument: "after" }
+      { new: true }
     );
 
     return NextResponse.json(updated);
@@ -81,25 +95,29 @@ export async function PUT(
   }
 }
 
-export async function DELETE(
-  req: Request,
-  context: { params: Promise<{ id: string }> }
-) {
+/* ================= DELETE ================= */
+export async function DELETE(req: Request, context: Context) {
   try {
     await connectDB();
-    const { id } = await context.params;
+
+    const { id } = await context.params; // ✅ FIX
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return NextResponse.json({ message: "Invalid ID" }, { status: 400 });
+      return NextResponse.json(
+        { message: "Invalid ID" },
+        { status: 400 }
+      );
     }
 
     const member = await Member.findById(id);
 
     if (!member) {
-      return NextResponse.json({ message: "Not found" }, { status: 404 });
+      return NextResponse.json(
+        { message: "Not found" },
+        { status: 404 }
+      );
     }
 
-    // 🔥 delete image file
     if (member.image) {
       const filePath = path.join(
         process.cwd(),
@@ -112,7 +130,9 @@ export async function DELETE(
 
     await Member.findByIdAndDelete(id);
 
-    return NextResponse.json({ message: "Deleted successfully" });
+    return NextResponse.json({
+      message: "Deleted successfully",
+    });
   } catch (error) {
     return NextResponse.json(
       { message: "Delete failed" },

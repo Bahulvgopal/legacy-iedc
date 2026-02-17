@@ -6,7 +6,6 @@ const MemberSchema = new mongoose.Schema(
     image: { type: String, required: true },
 
     role: { type: String, required: true },
-
     year: { type: String, required: true },
 
     status: {
@@ -17,7 +16,7 @@ const MemberSchema = new mongoose.Schema(
 
     priority: {
       type: Number,
-      default: 0, // for drag ordering
+      default: 0,
     },
 
     isMentor: {
@@ -27,8 +26,15 @@ const MemberSchema = new mongoose.Schema(
 
     bio: { type: String },
 
-    linkedin: { type: String },
-    github: { type: String },
+    socials: {
+      linkedin: { type: String, default: "" },
+      github: { type: String, default: "" },
+      instagram: { type: String, default: "" },
+      facebook: { type: String, default: "" },
+      whatsapp: { type: String, default: "" },
+      x: { type: String, default: "" },
+      website: { type: String, default: "" },
+    },
   },
   { timestamps: true }
 );

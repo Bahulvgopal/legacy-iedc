@@ -309,6 +309,7 @@ export default function Page() {
         </section>
 
         {/* --- CAROUSEL EVENT CARDS --- */}
+       {/* ===================== CAROUSEL EVENT CARDS ===================== */}
         <section className="py-24 md:py-32 px-6 md:px-12 lg:px-24 bg-gradient-to-b from-[#0a0a0a] to-black relative overflow-hidden">
           {/* Background decoration */}
           <div className="absolute inset-0 opacity-5">
@@ -319,7 +320,7 @@ export default function Page() {
           <div className="max-w-7xl mx-auto relative z-10">
             <Reveal>
               <div className="text-center space-y-6 mb-20 md:mb-24">
-                <motion.span 
+                <motion.span
                   className="inline-block text-[#f4b518] font-bold text-sm md:text-base tracking-[0.3em] uppercase"
                   initial={{ opacity: 0 }}
                   whileInView={{ opacity: 1 }}
@@ -345,54 +346,89 @@ export default function Page() {
               </motion.div>
             ) : (
               <>
-                <div className="relative flex justify-center items-center h-[550px] md:h-[650px] lg:h-[680px]">
-  <AnimatePresence mode="popLayout">
-    {events.length > 0 && [
-      (index - 1 + events.length) % events.length,
-      index,
-      (index + 1) % events.length,
-    ].map((i, position) => {
-      const event = events[i];
-      if (!event) return null;
+                {/*
+                  HOW THE ANIMATION WORKS
+                  ══════════════════════════════════════════════════════════
 
-      const isCenter = position === 1; // Middle card in the array
-      const isLeft = position === 0;
-      const isRight = position === 2;
+                  3 cards always rendered: left (pos 0), center (pos 1), right (pos 2).
 
-      return (
-        <motion.div
-          key={`${event._id}-${i}`} // Better key to force re-render
-          initial={{ 
-            opacity: 0, 
-            scale: 0.8, 
-            x: isLeft ? -200 : isRight ? 200 : 0 
-          }}
-          animate={{
-            opacity: isCenter ? 1 : 0.3,
-            scale: isCenter ? 1 : 0.75,
-            x: isLeft ? "-115%" : isRight ? "115%" : "0%",
-            zIndex: isCenter ? 20 : 10,
-            filter: isCenter ? "blur(0px)" : "blur(6px)"
-          }}
-          exit={{ 
-            opacity: 0, 
-            scale: 0.5,
-            transition: { duration: 0.3 }
-          }}
-          transition={{ 
-            duration: 0.7, 
-            ease: [0.25, 0.46, 0.45, 0.94] 
-          }}
-          className={`absolute w-full max-w-[300px] md:max-w-[380px] lg:max-w-[420px] ${
-            !isCenter ? "hidden md:block pointer-events-none" : "block"
-          }`}
-        >
-          <EventCard event={event} highlighted={isCenter} />
-        </motion.div>
-      );
-    })}
-  </AnimatePresence>
-</div>
+                  CENTER card → `position: relative`
+                    Sits in normal document flow. The wrapper grows to fit it
+                    exactly → no fixed height → no top/bottom clipping.
+
+                  SIDE cards → `position: absolute`
+                    Centered on the same point as center, then offset by x:
+                      left  = x "-115%"  (peek from left edge)
+                      right = x "115%"   (peek from right edge)
+                    Scaled to 0.78 + blur(5px) = depth/shadow peek effect.
+
+                  MOBILE:  overflow-hidden on wrapper clips side cards to a
+                           subtle blurred peek behind the center card.
+                  DESKTOP: overflow-visible reveals the full side cards.
+
+                  EXIT ANIMATION — why it was broken before:
+                  ──────────────────────────────────────────
+                  Old code used `hidden md:block` on side cards.
+                  `hidden` = display:none = element torn from DOM immediately.
+                  AnimatePresence needs the element mounted to animate it out.
+
+                  Fix: pointer-events-none keeps element mounted + animatable,
+                  just not clickable. Exit fires cleanly:
+                    opacity → 0, scale → 0.6, x slides further off-screen.
+                  ══════════════════════════════════════════════════════════
+                */}
+                <div className="relative flex justify-center items-center    md:overflow-visible">
+                  <AnimatePresence mode="popLayout">
+                    {[
+                      (index - 1 + events.length) % events.length,
+                      index,
+                      (index + 1) % events.length,
+                    ].map((i, position) => {
+                      const event = events[i];
+                      if (!event) return null;
+
+                      const isCenter = position === 1;
+                      const isLeft   = position === 0;
+                      const isRight  = position === 2;
+
+                      return (
+                        <motion.div
+                          key={`${event._id}-${i}`}
+                          initial={{
+                            opacity: 0,
+                            scale: 0.8,
+                            x: isLeft ? "-115%" : isRight ? "115%" : "0%",
+                          }}
+                          animate={{
+                            opacity: isCenter ? 1 : 0.35,
+                            scale:   isCenter ? 1 : 0.78,
+                            x:       isLeft ? "-115%" : isRight ? "115%" : "0%",
+                            zIndex:  isCenter ? 20 : 10,
+                            filter:  isCenter ? "blur(0px)" : "blur(5px)",
+                          }}
+                          exit={{
+                            opacity: 0,
+                            scale: 0.6,
+                            x: isLeft ? "-140%" : isRight ? "140%" : "0%",
+                            transition: { duration: 0.35, ease: "easeIn" },
+                          }}
+                          transition={{
+                            duration: 0.7,
+                            ease: [0.25, 0.46, 0.45, 0.94],
+                          }}
+                          className={[
+                            "w-full max-w-[300px] md:max-w-[380px] lg:max-w-[420px]",
+                            isCenter
+                              ? "relative"                      // drives wrapper height, no clip
+                              : "absolute pointer-events-none", // stays mounted for exit anim
+                          ].join(" ")}
+                        >
+                          <EventCard event={event} highlighted={isCenter} />
+                        </motion.div>
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
 
                 {/* Pagination Dots */}
                 <div className="flex justify-center gap-3 mt-12 md:mt-16">
@@ -403,8 +439,8 @@ export default function Page() {
                       whileHover={{ scale: 1.2 }}
                       whileTap={{ scale: 0.9 }}
                       className={`h-2.5 transition-all duration-500 rounded-full ${
-                        i === index 
-                          ? "w-12 bg-[#f4b518] shadow-lg shadow-[#f4b518]/50" 
+                        i === index
+                          ? "w-12 bg-[#f4b518] shadow-lg shadow-[#f4b518]/50"
                           : "w-2.5 bg-gray-700 hover:bg-gray-500"
                       }`}
                     />

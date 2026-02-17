@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/mongodb";
 import Member from "@/models/Member";
 import { roleStructure } from "@/lib/roleStructure";
 import TeamMemberCard from "./TeamMemberCard";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
