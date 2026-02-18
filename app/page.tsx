@@ -547,7 +547,7 @@ function EventCard({ event, highlighted }: { event: any; highlighted: boolean })
       </div>
 
       <Link 
-        href="/events"
+        href="/events/previous"
         className={`mt-5 md:mt-6 w-full py-3 md:py-4 rounded-xl font-bold text-xs md:text-sm uppercase tracking-widest transition-all text-center relative overflow-hidden group
           ${highlighted ? "bg-[#f4b518] text-black" : "bg-white/5 text-white hover:bg-white/10"}`}
       >

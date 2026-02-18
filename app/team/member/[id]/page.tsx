@@ -3,6 +3,7 @@ import Member from "@/models/Member";
 import MemberProfile from "@/components/MemberProfile";
 import mongoose from "mongoose";
 import { notFound } from "next/navigation";
+export const revalidate = 60;
 
 export default async function Page({
   params,

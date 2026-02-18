@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 
 interface TeamMemberCardProps {
   member: {
@@ -27,6 +28,7 @@ export default function TeamMemberCard({
       style={{
         animation: `fadeInUp 0.5s ease-out ${memberIndex * 0.05}s both`,
       }}
+      prefetch
     >
       <div className="relative bg-zinc-950 rounded-xl overflow-hidden border border-zinc-800 hover:border-[#f4b518] transition-all duration-500 hover:shadow-xl hover:shadow-[#f4b518]/30 hover:-translate-y-1">
 
@@ -36,10 +38,14 @@ export default function TeamMemberCard({
 
         {/* Image */}
         <div className="relative h-36 sm:h-40 md:h-44 overflow-hidden">
-          <img
+
+          <Image
             src={member.image}
             alt={member.name}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+            fill
+            sizes="(max-width: 768px) 100vw, 200px"
+            className="object-cover group-hover:scale-110 transition-transform duration-700"
+            priority={false}
           />
 
           {/* Overlay */}

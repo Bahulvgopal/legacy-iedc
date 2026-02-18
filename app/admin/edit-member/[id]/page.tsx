@@ -22,6 +22,7 @@ export default function EditMemberPage() {
   const [form, setForm] = useState({
     name: "",
     image: "",
+    imagePublicId: "", // ⭐ IMPORTANT
     role: "",
     year: "",
     status: "current",
@@ -65,7 +66,17 @@ export default function EditMemberPage() {
         if (!res.ok) throw new Error("Failed");
 
         const data = await res.json();
-        setForm(data);
+
+        // ⭐ SAFE MAPPING
+        setForm({
+          name: data.name || "",
+          image: data.image || "",
+          imagePublicId: data.imagePublicId || "",
+          role: data.role || "",
+          year: data.year || "",
+          status: data.status || "current",
+          bio: data.bio || "",
+        });
       } catch (err) {
         console.error("Failed to fetch member", err);
         alert("Member not found");
@@ -82,30 +93,42 @@ export default function EditMemberPage() {
   async function handleImageUpload(file: File) {
     if (!file) return;
 
-    try {
-      setUploading(true);
+    const reader = new FileReader();
 
-      const formData = new FormData();
-      formData.append("file", file);
+    reader.onloadend = async () => {
+      try {
+        setUploading(true);
 
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+        const res = await fetch("/api/upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            image: reader.result, // ⭐ base64
+            folder: "members",
+          }),
+        });
 
-      const data = await res.json();
+        const data = await res.json();
 
-      if (!res.ok) throw new Error();
+        if (!res.ok) throw new Error();
 
-      setForm((prev) => ({
-        ...prev,
-        image: data.filePath || data.url,
-      }));
-    } catch {
-      alert("Image upload failed");
-    } finally {
-      setUploading(false);
-    }
+        // ⭐ INSTANT PREVIEW + SAVE PUBLIC ID
+        setForm((prev) => ({
+          ...prev,
+          image: data.url,
+          imagePublicId: data.public_id,
+        }));
+      } catch (err) {
+        console.error(err);
+        alert("Image upload failed");
+      } finally {
+        setUploading(false);
+      }
+    };
+
+    reader.readAsDataURL(file);
   }
 
   /* ================= SUBMIT ================= */
@@ -166,7 +189,7 @@ export default function EditMemberPage() {
           <div className="flex flex-col items-center gap-4 bg-gray-800/30 p-6 rounded-xl border border-gray-800">
             <div className="relative">
               <img
-                src={form.image || "https://via.placeholder.com/150"}
+                src={`${form.image}?t=${Date.now()}`} // ⭐ CACHE FIX
                 className="w-32 h-32 rounded-full object-cover border-4 border-gray-700"
                 alt="preview"
               />

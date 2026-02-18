@@ -4,7 +4,7 @@ import cloudinary from "@/lib/cloudinary";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { image } = body;
+    const { image, folder = "legacy-iedc" } = body;
 
     if (!image) {
       return NextResponse.json(
@@ -14,8 +14,14 @@ export async function POST(req: Request) {
     }
 
     const uploaded = await cloudinary.uploader.upload(image, {
-      folder: "legacy-iedc",
+      folder,
       resource_type: "image",
+
+      // ⭐ PERFORMANCE OPTIMIZATION
+      transformation: [
+        { width: 1200, crop: "limit", quality: "auto" },
+        { fetch_format: "auto" },
+      ],
     });
 
     return NextResponse.json({
@@ -24,6 +30,7 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error(error);
+
     return NextResponse.json(
       { message: "Upload failed" },
       { status: 500 }
