@@ -60,7 +60,7 @@ export default function AddMemberPage() {
     reader.readAsDataURL(file);
   }
 
-  /* ================= SUBMIT ================= */
+  /* ================= SUBMIT page ================= */
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!form.image) {
