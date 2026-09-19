@@ -9,6 +9,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
+  async redirects() {
+    return [
+      {
+        source: "/intern",
+        destination: "https://forms.gle/QkhLhpXYreS2omjL7",
+        permanent: false,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
